@@ -87,6 +87,10 @@ input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-ra
 .user-row:last-child{border-bottom:none}
 .user-row strong{color:#0f172a}
 .user-row span{color:#475569;font-size:14px}
+.admin-list{margin-top:14px;border-top:1px solid #e5e7eb;padding-top:10px}
+.admin-list-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #eef2f7}
+.admin-list-row:last-child{border-bottom:none}
+.admin-list-row span{color:#64748b;font-size:13px}
 .btn-primary{background:#2563eb;color:white}
 .btn-red{background:#dc0022;color:white}
 .auth-main{display:flex;justify-content:center;align-items:center;padding:40px 18px 80px}

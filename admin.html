@@ -62,28 +62,31 @@
     <div class="panel">
       <h3>Thêm/sửa sản phẩm</h3>
       <p>Khu vực dành cho nhân viên sản phẩm.</p>
-      <input placeholder="Tên sản phẩm"><br><br>
+      <input id="adminProductName" placeholder="Tên sản phẩm"><br><br>
       <div class="form-row">
-        <input placeholder="Giá bán">
-        <select><option>Điện tử</option><option>Thời trang</option><option>Mô hình</option><option>Gia dụng</option><option>Đóng gói</option></select>
+        <input id="adminProductPrice" type="number" min="0" placeholder="Giá bán">
+        <select id="adminProductCategory"><option>Điện tử</option><option>Thời trang</option><option>Mô hình</option><option>Gia dụng</option><option>Đóng gói</option></select>
       </div>
-      <textarea rows="4" placeholder="Mô tả sản phẩm"></textarea>
+      <textarea id="adminProductDescription" rows="4" placeholder="Mô tả sản phẩm"></textarea>
       <br><br>
-      <button class="btn btn-primary">Lưu sản phẩm</button>
+      <button class="btn btn-primary" type="button" onclick="createAdminProduct()">Lưu sản phẩm</button>
+      <div class="result-box" id="adminProductResult"></div>
+      <div class="admin-list" id="adminProductList"></div>
     </div>
 
     <div class="panel">
       <h3>Phân công giao hàng</h3>
       <p>Khu vực dành cho nhân viên điều phối.</p>
       <div class="form-row">
-        <input placeholder="Mã đơn hàng">
-        <select><option>Tài xế A</option><option>Tài xế B</option><option>Tài xế C</option></select>
+        <input id="assignOrderId" placeholder="Mã đơn hàng">
+        <select id="assignDriver"><option>Tài xế A</option><option>Tài xế B</option><option>Tài xế C</option></select>
       </div>
       <div class="form-row">
-        <select><option>Xe tải 1 tấn</option><option>Xe tải 3.5 tấn</option><option>Container 20 feet</option></select>
-        <input placeholder="Tuyến giao">
+        <select id="assignVehicle"><option>Xe tải 1 tấn</option><option>Xe tải 3.5 tấn</option><option>Container 20 feet</option></select>
+        <input id="assignRoute" placeholder="Tuyến giao">
       </div>
-      <button class="btn btn-red">Phân công</button>
+      <button class="btn btn-red" type="button" onclick="assignDelivery()">Phân công</button>
+      <div class="result-box" id="assignResult"></div>
     </div>
   </section>
 
@@ -98,7 +101,7 @@
           <th>Tài xế</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="adminOrderTableBody">
         <tr>
           <td>LG20260620-001</td>
           <td>Nguyễn Văn A</td>

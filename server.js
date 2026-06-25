@@ -106,6 +106,24 @@ async function initDatabase() {
     displayName TEXT
   )`);
 
+  await dbRun(`CREATE TABLE IF NOT EXISTS products (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    price INTEGER NOT NULL,
+    category TEXT,
+    description TEXT,
+    createdAt TEXT
+  )`);
+
+  await dbRun(`CREATE TABLE IF NOT EXISTS delivery_assignments (
+    orderId TEXT PRIMARY KEY,
+    driver TEXT NOT NULL,
+    vehicle TEXT,
+    route TEXT,
+    status TEXT,
+    assignedAt TEXT
+  )`);
+
   const defaults = [
     { username: 'admin', password: 'admin123', role: 'admin', displayName: 'Nguyễn Quản Trị' },
     { username: 'nhanvien', password: 'nv123456', role: 'staff', displayName: 'Lê Nhân Viên' },
@@ -163,18 +181,42 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
   res.json(user);
 });
 
-app.get('/api/products', authenticateToken, (req, res) => {
+app.get('/api/public-products', async (req, res) => {
+  const products = await dbAll('SELECT * FROM products ORDER BY createdAt DESC');
+  res.json({ products });
+});
+
+app.get('/api/products', authenticateToken, async (req, res) => {
   if (!rolePermissions[req.user.role].includes('view_products')) {
     return res.status(403).json({ message: 'Bạn không có quyền xem sản phẩm.' });
   }
 
-  res.json({ products: [{ id: 1, name: 'Bàn phím cơ', price: 790000 }, { id: 2, name: 'Giày sneaker', price: 450000 }] });
+  const products = await dbAll('SELECT * FROM products ORDER BY createdAt DESC');
+  res.json({ products });
 });
 
-app.post('/api/products', authenticateToken, authorizeRole(['admin', 'staff']), (req, res) => {
-  const { name, price } = req.body;
-  if (!name || !price) return res.status(400).json({ message: 'Thiếu tên sản phẩm hoặc giá bán.' });
-  res.status(201).json({ message: 'Sản phẩm đã được thêm (demo).', product: { id: Date.now(), name, price } });
+app.post('/api/products', authenticateToken, authorizeRole(['admin', 'staff']), async (req, res) => {
+  const { name, price, category, description } = req.body;
+  const numericPrice = Number(price);
+  if (!name || !numericPrice || numericPrice < 0) {
+    return res.status(400).json({ message: 'Thiếu tên sản phẩm hoặc giá bán không hợp lệ.' });
+  }
+
+  const product = {
+    id: `PRD-${Date.now()}`,
+    name: name.trim(),
+    price: Math.round(numericPrice),
+    category: category || 'Khác',
+    description: description || '',
+    createdAt: new Date().toISOString()
+  };
+
+  await dbRun(
+    'INSERT INTO products (id, name, price, category, description, createdAt) VALUES (?, ?, ?, ?, ?, ?)',
+    [product.id, product.name, product.price, product.category, product.description, product.createdAt]
+  );
+
+  res.status(201).json({ message: 'Sản phẩm đã được lưu.', product });
 });
 
 app.get('/api/orders', authenticateToken, (req, res) => {
@@ -187,10 +229,71 @@ app.get('/api/orders', authenticateToken, (req, res) => {
   res.status(403).json({ message: 'Bạn không có quyền xem đơn hàng.' });
 });
 
-app.post('/api/assign', authenticateToken, authorizeRole(['admin']), (req, res) => {
-  const { orderId, driver } = req.body;
-  if (!orderId || !driver) return res.status(400).json({ message: 'Thiếu orderId hoặc driver.' });
-  res.json({ message: `Đã phân công ${driver} cho đơn ${orderId} (demo).` });
+app.get('/api/admin/orders', authenticateToken, authorizeRole(['admin', 'staff']), async (req, res) => {
+  const assignments = await dbAll('SELECT * FROM delivery_assignments ORDER BY assignedAt DESC');
+  const assignmentMap = new Map(assignments.map(item => [item.orderId, item]));
+  const demoOrders = [
+    { orderId: 'LG20260620-001', customer: 'Nguyễn Văn A', department: 'Điều phối', status: 'Đang giao', driver: 'Tài xế A' },
+    { orderId: 'LG20260620-002', customer: 'Trần Thị B', department: 'Kho vận', status: 'Chờ xuất kho', driver: 'Chưa phân' },
+    { orderId: 'LG20260620-003', customer: 'Lê Minh C', department: 'CSKH', status: 'Hoàn tất', driver: 'Tài xế B' }
+  ];
+
+  const orders = demoOrders.map(order => {
+    const assignment = assignmentMap.get(order.orderId);
+    return assignment ? {
+      ...order,
+      status: assignment.status,
+      driver: assignment.driver,
+      vehicle: assignment.vehicle,
+      route: assignment.route,
+      assignedAt: assignment.assignedAt
+    } : order;
+  });
+
+  assignments.forEach(assignment => {
+    if (!orders.some(order => order.orderId === assignment.orderId)) {
+      orders.push({
+        orderId: assignment.orderId,
+        customer: 'Khách hàng',
+        department: 'Điều phối',
+        status: assignment.status,
+        driver: assignment.driver,
+        vehicle: assignment.vehicle,
+        route: assignment.route,
+        assignedAt: assignment.assignedAt
+      });
+    }
+  });
+
+  res.json({ orders });
+});
+
+app.post('/api/assign', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+  const { orderId, driver, vehicle, route } = req.body;
+  if (!orderId || !driver) return res.status(400).json({ message: 'Thiếu mã đơn hàng hoặc tài xế.' });
+
+  const assignment = {
+    orderId: orderId.trim(),
+    driver,
+    vehicle: vehicle || '',
+    route: route || 'Chưa cập nhật',
+    status: 'Đang giao',
+    assignedAt: new Date().toISOString()
+  };
+
+  await dbRun(
+    `INSERT INTO delivery_assignments (orderId, driver, vehicle, route, status, assignedAt)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT(orderId) DO UPDATE SET
+       driver = excluded.driver,
+       vehicle = excluded.vehicle,
+       route = excluded.route,
+       status = excluded.status,
+       assignedAt = excluded.assignedAt`,
+    [assignment.orderId, assignment.driver, assignment.vehicle, assignment.route, assignment.status, assignment.assignedAt]
+  );
+
+  res.json({ message: `Đã phân công ${driver} cho đơn ${assignment.orderId}.`, assignment });
 });
 
 app.get('/api/users', authenticateToken, authorizeRole(['admin']), async (req, res) => {
