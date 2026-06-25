@@ -77,7 +77,7 @@ function getOrderByCode(code) {
 }
 
 function updateCartCount() {
-  cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  cartCount = currentUser && authToken ? cartItems.reduce((sum, item) => sum + item.quantity, 0) : 0;
   const cart = document.getElementById('cartCount');
   if (cart) cart.innerText = cartCount;
 }
@@ -86,7 +86,17 @@ function formatVND(value) {
   return '₫' + value.toLocaleString('vi-VN');
 }
 
+function requireLogin(actionName = 'thực hiện thao tác này') {
+  if (currentUser && authToken) return true;
+  alert(`Vui lòng đăng nhập để ${actionName}.`);
+  if (!window.location.pathname.endsWith('auth.html')) {
+    window.location.href = 'auth.html';
+  }
+  return false;
+}
+
 function addToCart(buttonElement) {
+  if (!requireLogin('thêm sản phẩm vào giỏ hàng')) return;
   const button = buttonElement || (typeof event !== 'undefined' ? event.currentTarget || event.target : null);
   if (!button) return;
   const card = button.closest('.product-card');
@@ -114,6 +124,12 @@ function renderCart() {
   const content = document.getElementById('cartContent');
   const summary = document.getElementById('cartSummary');
   if (!content || !summary) return;
+
+  if (!currentUser || !authToken) {
+    content.innerHTML = '<p>Vui lòng đăng nhập để xem và thao tác giỏ hàng.</p>';
+    summary.innerHTML = '';
+    return;
+  }
 
   if (cartItems.length === 0) {
     content.innerHTML = '<p>Giỏ hàng đang trống. Thêm sản phẩm vào giỏ để xem chi tiết ở đây.</p>';
@@ -176,6 +192,7 @@ function renderCart() {
 }
 
 function removeCartItem(productId) {
+  if (!requireLogin('xóa sản phẩm khỏi giỏ hàng')) return;
   const decodedId = decodeURIComponent(productId);
   cartItems = cartItems.filter(item => item.id !== decodedId);
   saveCart();
@@ -184,6 +201,7 @@ function removeCartItem(productId) {
 }
 
 function updateCartQuantity(productId, change) {
+  if (!requireLogin('cập nhật số lượng giỏ hàng')) return;
   const decodedId = decodeURIComponent(productId);
   cartItems = cartItems
     .map(item => item.id === decodedId ? { ...item, quantity: item.quantity + change } : item)
@@ -194,6 +212,7 @@ function updateCartQuantity(productId, change) {
 }
 
 function clearCart() {
+  if (!requireLogin('xóa giỏ hàng')) return;
   cartItems = [];
   saveCart();
   updateCartCount();
@@ -201,6 +220,7 @@ function clearCart() {
 }
 
 function checkoutCart() {
+  if (!requireLogin('thanh toán đơn hàng')) return;
   if (cartItems.length === 0) {
     showCheckoutFeedback('Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi thanh toán.', true);
     return;
@@ -286,6 +306,11 @@ function renderOrderHistory() {
   const history = document.getElementById('orderHistory');
   if (!history) return;
 
+  if (!currentUser || !authToken) {
+    history.innerHTML = '<p>Vui lòng đăng nhập để xem lịch sử đặt hàng.</p>';
+    return;
+  }
+
   const orders = getSavedOrders().slice().reverse();
   if (!orders.length) {
     history.innerHTML = '<p>Chưa có đơn hàng nào được đặt trên trình duyệt này.</p>';
@@ -341,6 +366,8 @@ function setAuthState(user, token) {
   localStorage.setItem('logiport_token', token);
   localStorage.setItem('logiport_user', JSON.stringify(user));
   updateAuthUI();
+  updateCartCount();
+  renderCart();
   protectAdminPage();
   initAdminData();
 }
@@ -351,6 +378,8 @@ function clearAuth() {
   localStorage.removeItem('logiport_token');
   localStorage.removeItem('logiport_user');
   updateAuthUI();
+  updateCartCount();
+  renderCart();
   protectAdminPage();
 }
 
@@ -524,6 +553,7 @@ function searchProduct(){
 }
 
 function trackOrder(inputId = 'trackingCode', resultId = 'trackingResult') {
+  if (!requireLogin('tra cứu đơn hàng')) return;
   const input = document.getElementById(inputId);
   const code = input ? input.value.trim() : '';
   const result = document.getElementById(resultId);
@@ -589,6 +619,7 @@ function initLogisticsPage() {
 }
 
 function submitTransportRequest() {
+  if (!requireLogin('gửi yêu cầu vận chuyển')) return;
   const pickup = document.getElementById('pickupPoint')?.value.trim();
   const delivery = document.getElementById('deliveryPoint')?.value.trim();
   const vehicle = document.getElementById('vehicleType')?.value || 'Xe tải nhỏ';
@@ -624,6 +655,7 @@ function submitTransportRequest() {
 }
 
 function calculateWarehouseFee() {
+  if (!requireLogin('tính phí lưu kho')) return;
   const pallets = Number(document.getElementById('warehousePallets')?.value || 0);
   const days = Number(document.getElementById('warehouseDays')?.value || 0);
   const result = document.getElementById('warehouseResult');
@@ -644,6 +676,7 @@ function calculateWarehouseFee() {
 }
 
 function checkCustomsDocs() {
+  if (!requireLogin('kiểm tra hồ sơ hải quan')) return;
   const required = ['Hóa đơn thương mại', 'Packing list', 'Vận đơn', 'Tờ khai hải quan'];
   const selected = Array.from(document.querySelectorAll('.customs-doc:checked')).map(input => input.value);
   const missing = required.filter(item => !selected.includes(item));
@@ -662,6 +695,7 @@ function checkCustomsDocs() {
 }
 
 function runGreedy(){
+  if (!requireLogin('tối ưu tuyến giao hàng')) return;
   const result = document.getElementById('greedyResult');
   const input = document.getElementById('greedyPoints');
   const points = (input?.value || 'Cảng Cát Lái\nQuận 7\nThủ Đức\nBình Dương')
@@ -999,6 +1033,10 @@ function initChatBox() {
 }
 
 function toggleChatBox(forceOpen) {
+  if (!currentUser || !authToken) {
+    requireLogin('sử dụng chat AI');
+    return;
+  }
   const panel = document.getElementById('aiChatPanel');
   if (!panel) return;
   const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !panel.classList.contains('open');
@@ -1020,6 +1058,7 @@ function renderChatMessages() {
 
 async function sendChatMessage(event) {
   event.preventDefault();
+  if (!requireLogin('sử dụng chat AI')) return;
   const input = document.getElementById('aiChatInput');
   const message = input?.value.trim();
   if (!message) return;
