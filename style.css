@@ -74,7 +74,8 @@ button{font-family:inherit}
 .checkout-form select{appearance:none}
 .cart-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .qty-btn{width:34px;height:34px;border:1px solid #cbd5e1;border-radius:6px;background:white;color:#111827;font-weight:bold;cursor:pointer}
-.order-history{margin-top:14px;border-top:1px solid #e5e7eb;padding-top:14px}
+.order-history-title{margin:18px 0 0;font-size:18px;color:#111827}
+.order-history{margin-top:10px;border-top:1px solid #e5e7eb;padding-top:14px}
 .order-history-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #eef2f7}
 .order-history-item:last-child{border-bottom:none}
 .order-history-item small{color:#64748b}
