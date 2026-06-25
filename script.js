@@ -47,6 +47,7 @@ function initCart() {
   }
   updateCartCount();
   renderCart();
+  renderOrderHistory();
 }
 
 function saveCart() {
@@ -57,10 +58,15 @@ function saveOrder(order) {
   const orders = JSON.parse(localStorage.getItem('logiport_orders') || '[]');
   orders.push(order);
   localStorage.setItem('logiport_orders', JSON.stringify(orders));
+  renderOrderHistory();
 }
 
 function getSavedOrders() {
-  return JSON.parse(localStorage.getItem('logiport_orders') || '[]');
+  try {
+    return JSON.parse(localStorage.getItem('logiport_orders') || '[]');
+  } catch {
+    return [];
+  }
 }
 
 function getOrderByCode(code) {
@@ -117,7 +123,19 @@ function renderCart() {
 
   let html = '<div class="cart-items">';
   cartItems.forEach(item => {
-    html += `<div class="cart-item"><div><strong>${item.name}</strong><div>${formatVND(item.price)} × ${item.quantity}</div></div><div><button class="btn btn-secondary" type="button" onclick="removeCartItem('${item.id}')">Xóa</button></div></div>`;
+    html += `
+      <div class="cart-item">
+        <div>
+          <strong>${escapeHtml(item.name)}</strong>
+          <div>${formatVND(item.price)} × ${item.quantity}</div>
+        </div>
+        <div class="cart-actions">
+          <button class="qty-btn" type="button" onclick="updateCartQuantity('${encodeURIComponent(item.id)}', -1)">-</button>
+          <span>${item.quantity}</span>
+          <button class="qty-btn" type="button" onclick="updateCartQuantity('${encodeURIComponent(item.id)}', 1)">+</button>
+          <button class="btn btn-secondary" type="button" onclick="removeCartItem('${encodeURIComponent(item.id)}')">Xóa</button>
+        </div>
+      </div>`;
   });
   html += '</div>';
   content.innerHTML = html;
@@ -158,7 +176,18 @@ function renderCart() {
 }
 
 function removeCartItem(productId) {
-  cartItems = cartItems.filter(item => item.id !== productId);
+  const decodedId = decodeURIComponent(productId);
+  cartItems = cartItems.filter(item => item.id !== decodedId);
+  saveCart();
+  updateCartCount();
+  renderCart();
+}
+
+function updateCartQuantity(productId, change) {
+  const decodedId = decodeURIComponent(productId);
+  cartItems = cartItems
+    .map(item => item.id === decodedId ? { ...item, quantity: item.quantity + change } : item)
+    .filter(item => item.quantity > 0);
   saveCart();
   updateCartCount();
   renderCart();
@@ -212,7 +241,7 @@ function checkoutCart() {
     payment,
     total,
     placedAt: orderDate,
-    items: cartItems
+    items: cartItems.map(item => ({ ...item }))
   };
 
   saveOrder(order);
@@ -251,6 +280,43 @@ function showCheckoutFeedback(message, isError) {
   if (!checkoutResult) return;
   checkoutResult.style.display = 'block';
   checkoutResult.innerHTML = `<p style="color:${isError ? '#b91c1c' : '#047857'}; margin:0">${message}</p>`;
+}
+
+function renderOrderHistory() {
+  const history = document.getElementById('orderHistory');
+  if (!history) return;
+
+  const orders = getSavedOrders().slice().reverse();
+  if (!orders.length) {
+    history.innerHTML = '<p>Chưa có đơn hàng nào được đặt trên trình duyệt này.</p>';
+    return;
+  }
+
+  history.innerHTML = orders.map(order => `
+    <div class="order-history-item">
+      <div>
+        <strong>${escapeHtml(order.code)}</strong>
+        <div>${escapeHtml(order.customer || 'Khách hàng')} - ${formatVND(order.total || 0)}</div>
+        <small>${escapeHtml(order.placedAt || '')}</small>
+      </div>
+      <button class="btn btn-secondary" type="button" onclick="fillAndTrackOrder('${escapeHtml(order.code)}')">Tra cứu</button>
+    </div>
+  `).join('');
+}
+
+function fillAndTrackOrder(code) {
+  const input = document.getElementById('orderCodeInput') || document.getElementById('trackingCode');
+  if (input) input.value = code;
+  trackOrder(input?.id || 'orderCodeInput', input?.id === 'trackingCode' ? 'trackingResult' : 'orderLookupResult');
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
 
 function openLoginModal() {
@@ -467,21 +533,34 @@ function trackOrder(inputId = 'trackingCode', resultId = 'trackingResult') {
     return;
   }
 
-  const order = orderDatabase.find(item => item.code.toLowerCase() === code.toLowerCase());
+  const order = getOrderByCode(code);
   if (!order) {
-    if (result) result.innerHTML = `<strong>Không tìm thấy đơn hàng:</strong> ${code}. Vui lòng kiểm tra lại mã đơn.`;
+    if (result) result.innerHTML = `<strong>Không tìm thấy đơn hàng:</strong> ${escapeHtml(code)}. Vui lòng kiểm tra lại mã đơn.`;
     return;
   }
 
+  const itemsHtml = order.items?.length
+    ? `<br><strong>Sản phẩm:</strong><ul>${order.items.map(item => `<li>${escapeHtml(item.name)} × ${item.quantity} - ${formatVND(item.price * item.quantity)}</li>`).join('')}</ul>`
+    : '';
+  const totalHtml = order.total ? `<br><strong>Tổng tiền:</strong> ${formatVND(order.total)}` : '';
+  const contactHtml = [
+    order.phone ? `<br><strong>Điện thoại:</strong> ${escapeHtml(order.phone)}` : '',
+    order.address ? `<br><strong>Địa chỉ:</strong> ${escapeHtml(order.address)}` : '',
+    order.payment ? `<br><strong>Thanh toán:</strong> ${escapeHtml(order.payment)}` : ''
+  ].join('');
+
   if (result) result.innerHTML =
-    `<strong>Mã đơn:</strong> ${order.code}<br>` +
-    `<strong>Người nhận:</strong> ${order.customer} (${order.role})<br>` +
-    `<strong>Trạng thái:</strong> ${order.status}<br>` +
-    `<strong>Tuyến đường:</strong> ${order.route}<br>` +
-    `<strong>Tài xế:</strong> ${order.driver}<br>` +
-    `<strong>ETA:</strong> ${order.eta}<br>` +
-    `<strong>Email thông báo:</strong> ${order.email}<br>` +
-    `<strong>Ghi chú:</strong> ${order.note}`;
+    `<strong>Mã đơn:</strong> ${escapeHtml(order.code)}<br>` +
+    `<strong>Người nhận:</strong> ${escapeHtml(order.customer)} (${escapeHtml(order.role)})<br>` +
+    `<strong>Trạng thái:</strong> ${escapeHtml(order.status)}<br>` +
+    `<strong>Tuyến đường:</strong> ${escapeHtml(order.route)}<br>` +
+    `<strong>Tài xế:</strong> ${escapeHtml(order.driver)}<br>` +
+    `<strong>ETA:</strong> ${escapeHtml(order.eta)}<br>` +
+    `<strong>Email thông báo:</strong> ${escapeHtml(order.email || 'Chưa có')}<br>` +
+    `<strong>Ghi chú:</strong> ${escapeHtml(order.note)}` +
+    contactHtml +
+    totalHtml +
+    itemsHtml;
 }
 
 function runGreedy(){
