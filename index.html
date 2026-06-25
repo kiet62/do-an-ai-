@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogiPort Mart - Sản phẩm</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="top-line"></div>
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">LOGIPORT<span>MART.COM</span></div>
+    <button class="menu-btn">☰ Danh mục</button>
+    <div class="search">
+      <input id="searchInput" type="text" placeholder="Bạn cần tìm gì? Ví dụ: bàn phím, quần áo, mô hình tàu, pallet...">
+      <button onclick="searchProduct()">🔍</button>
+    </div>
+    <div class="header-action"><span class="icon">☎</span><div>Hotline<br>1900.5301</div></div>
+    <div class="header-action"><span class="icon">📦</span><div>Tra cứu<br>đơn hàng</div></div>
+    <div class="header-action"><span class="icon">🛒</span><div>Giỏ hàng<br><span id="cartCount">0</span> sản phẩm</div></div>
+    <a class="header-action auth-action" id="authAction" href="auth.html"><span class="icon">👤</span><div id="authActionText">Đăng<br>nhập</div></a>
+    <button id="logoutButtonHeader" class="btn btn-secondary logout-button" type="button" onclick="clearAuth()" style="display:none; margin-left:12px;">Đăng xuất</button>
+  </div>
+</header>
+<nav class="sub-nav">
+  <div class="sub-nav-inner">
+    <a class="active" href="index.html">🛒 Sản phẩm</a>
+    <a href="logistics.html">🚚 Logistics</a>
+    <a id="adminLink" href="admin.html">👑 Quản trị</a>
+  </div>
+</nav>
+
+<main class="main">
+  <section class="hero-layout">
+    <aside class="category-sidebar">
+      <a href="#electronics" class="cat-item"><span class="cat-left"><span class="cat-icon">💻</span>Điện tử, laptop</span><span class="cat-arrow">›</span></a>
+      <a href="#electronics" class="cat-item"><span class="cat-left"><span class="cat-icon">⌨️</span>Bàn phím, chuột</span><span class="cat-arrow">›</span></a>
+      <a href="#fashion" class="cat-item"><span class="cat-left"><span class="cat-icon">👕</span>Quần áo, giày dép</span><span class="cat-arrow">›</span></a>
+      <a href="#fashion" class="cat-item"><span class="cat-left"><span class="cat-icon">🎒</span>Túi, balo, phụ kiện</span><span class="cat-arrow">›</span></a>
+      <a href="#model" class="cat-item"><span class="cat-left"><span class="cat-icon">🚢</span>Mô hình tàu, xe</span><span class="cat-arrow">›</span></a>
+      <a href="#home-goods" class="cat-item"><span class="cat-left"><span class="cat-icon">🏠</span>Gia dụng</span><span class="cat-arrow">›</span></a>
+      <a href="#home-goods" class="cat-item"><span class="cat-left"><span class="cat-icon">🪑</span>Hàng cồng kềnh</span><span class="cat-arrow">›</span></a>
+      <a href="#packing" class="cat-item"><span class="cat-left"><span class="cat-icon">📦</span>Thùng, pallet</span><span class="cat-arrow">›</span></a>
+      <a href="#packing" class="cat-item"><span class="cat-left"><span class="cat-icon">🏷️</span>Tem nhãn, đóng gói</span><span class="cat-arrow">›</span></a>
+      <a href="logistics.html" class="cat-item"><span class="cat-left"><span class="cat-icon">🚚</span>Dịch vụ logistics</span><span class="cat-arrow">›</span></a>
+    </aside>
+
+    <section class="banner-grid">
+      <div class="big-banner">
+        <div class="date">01.06 - 30.06.2026</div>
+        <h1>Sàn hàng hóa qua cảng tích hợp logistics thông minh</h1>
+        <p>Trang này chỉ dành cho sản phẩm: điện tử, thời trang, mô hình, gia dụng và vật tư đóng gói.</p>
+        <div class="ship">🛒</div>
+      </div>
+      <div class="small-banner"><h3>Flash Sale</h3><p>Điện tử giảm sốc</p><div class="emoji">⌨️</div></div>
+      <div class="small-banner"><h3>Hàng cồng kềnh</h3><p>Đóng gói kỹ</p><div class="emoji">📦</div></div>
+    </section>
+
+    <aside class="right-ad">
+      <h3>Đổi trả dễ dàng</h3>
+      <div class="emoji">✅</div>
+      <p>Theo dõi vận đơn riêng</p>
+    </aside>
+  </section>
+
+  <section class="promo-row">
+    <div class="promo-card"><h3>Keyboard</h3><p>Giảm đến 30%</p><div class="emoji">⌨️</div></div>
+    <div class="promo-card"><h3>Fashion</h3><p>Giao nhanh 24h</p><div class="emoji">👕</div></div>
+    <div class="promo-card"><h3>Model Ship</h3><p>Đóng gói chống sốc</p><div class="emoji">🚢</div></div>
+    <div class="promo-card"><h3>Packing</h3><p>Vật tư kho vận</p><div class="emoji">📦</div></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Tra cứu đơn hàng nhanh</h2><a href="logistics.html">Xem thêm logistics ></a></div>
+    <div class="order-search-grid">
+      <input id="orderCodeInput" type="text" placeholder="Nhập mã đơn hàng: LG20260620-001">
+      <button class="btn btn-primary" type="button" onclick="trackOrder('orderCodeInput','orderLookupResult')">Tra cứu đơn hàng</button>
+    </div>
+    <div class="result-box" id="orderLookupResult"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Giỏ hàng của bạn</h2><a href="#" onclick="clearCart(); return false;">Xóa toàn bộ</a></div>
+    <div class="product-grid" id="cartContent"><p>Giỏ hàng đang trống. Thêm sản phẩm vào giỏ để xem chi tiết ở đây.</p></div>
+    <div class="cart-summary" id="cartSummary"></div>
+    <div class="result-box" id="checkoutResult"></div>
+  </section>
+
+  <section class="section" id="electronics">
+    <div class="section-head"><h2>Điện tử, laptop, bàn phím, chuột</h2><a href="#">Xem tất cả ></a></div>
+    <div class="product-grid">
+      <div class="product-card" data-name="bàn phím cơ gaming rgb nhập khẩu"><span class="tag">HOT</span><div class="thumb">⌨️</div><div class="heart">♡</div><div><div class="brand">TECHZONE</div><div class="name">Bàn phím cơ gaming RGB nhập khẩu</div><div class="promo">Hàng điện tử qua cảng</div><div class="price">790.000đ</div><span class="old-price">990.000đ</span><span class="discount">-20%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="chuột không dây văn phòng"><span class="tag">GIẢM 15%</span><div class="thumb">🖱️</div><div class="heart">♡</div><div><div class="brand">TECHZONE</div><div class="name">Chuột không dây văn phòng pin lâu</div><div class="promo">Giao nhanh nội địa</div><div class="price">250.000đ</div><span class="old-price">300.000đ</span><span class="discount">-15%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="laptop văn phòng 14 inch"><span class="tag">MỚI</span><div class="thumb">💻</div><div class="heart">♡</div><div><div class="brand">LAPTOP</div><div class="name">Laptop văn phòng 14 inch mỏng nhẹ</div><div class="promo">Có bảo hiểm vận chuyển</div><div class="price">12.900.000đ</div><span class="old-price">14.500.000đ</span><span class="discount">-11%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="tai nghe bluetooth chống ồn"><span class="tag">BÁN CHẠY</span><div class="thumb">🎧</div><div class="heart">♡</div><div><div class="brand">AUDIO</div><div class="name">Tai nghe bluetooth chống ồn</div><div class="promo">Đóng gói chống sốc</div><div class="price">590.000đ</div><span class="old-price">750.000đ</span><span class="discount">-21%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="điện thoại thông minh 5g"><span class="tag">NHẬP KHẨU</span><div class="thumb">📱</div><div class="heart">♡</div><div><div class="brand">MOBILE</div><div class="name">Điện thoại thông minh 5G chính hãng</div><div class="promo">Theo dõi kiện hàng realtime</div><div class="price">8.990.000đ</div><span class="old-price">10.500.000đ</span><span class="discount">-14%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+    </div>
+  </section>
+
+  <section class="section" id="fashion">
+    <div class="section-head"><h2>Thời trang, quần áo, giày dép</h2><a href="#">Xem tất cả ></a></div>
+    <div class="product-grid">
+      <div class="product-card" data-name="áo thun cotton basic"><span class="tag">FASHION</span><div class="thumb">👕</div><div class="heart">♡</div><div><div class="brand">CLOTHING</div><div class="name">Áo thun cotton basic nam nữ</div><div class="promo">Đóng gói theo kiện</div><div class="price">129.000đ</div><span class="old-price">169.000đ</span><span class="discount">-24%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="quần jeans form rộng"><span class="tag">HOT</span><div class="thumb">👖</div><div class="heart">♡</div><div><div class="brand">DENIM</div><div class="name">Quần jeans form rộng unisex</div><div class="promo">Hàng đóng bao vận chuyển</div><div class="price">299.000đ</div><span class="old-price">390.000đ</span><span class="discount">-23%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="giày sneaker thể thao"><span class="tag">SALE</span><div class="thumb">👟</div><div class="heart">♡</div><div><div class="brand">SHOES</div><div class="name">Giày sneaker thể thao thời trang</div><div class="promo">Có mã vận đơn</div><div class="price">450.000đ</div><span class="old-price">590.000đ</span><span class="discount">-24%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="túi xách nữ công sở"><span class="tag">MỚI</span><div class="thumb">👜</div><div class="heart">♡</div><div><div class="brand">BAG</div><div class="name">Túi xách nữ công sở phong cách Hàn</div><div class="promo">Đóng gói chống móp</div><div class="price">350.000đ</div><span class="old-price">420.000đ</span><span class="discount">-17%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="balo laptop chống nước"><span class="tag">GIẢM 10%</span><div class="thumb">🎒</div><div class="heart">♡</div><div><div class="brand">BALO</div><div class="name">Balo laptop chống nước nhiều ngăn</div><div class="promo">Giao hàng tận nơi</div><div class="price">280.000đ</div><span class="old-price">320.000đ</span><span class="discount">-13%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+    </div>
+  </section>
+
+  <section class="section" id="model">
+    <div class="section-head"><h2>Mô hình, đồ chơi, quà tặng</h2><a href="#">Xem tất cả ></a></div>
+    <div class="product-grid">
+      <div class="product-card" data-name="mô hình tàu container"><span class="tag">MÔ HÌNH</span><div class="thumb">🚢</div><div class="heart">♡</div><div><div class="brand">MODEL</div><div class="name">Mô hình tàu container trang trí</div><div class="promo">Chủ đề cảng biển</div><div class="price">399.000đ</div><span class="old-price">499.000đ</span><span class="discount">-20%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="mô hình xe container"><span class="tag">HOT</span><div class="thumb">🚛</div><div class="heart">♡</div><div><div class="brand">MODEL</div><div class="name">Mô hình xe container tỉ lệ 1:32</div><div class="promo">Đóng hộp chống va đập</div><div class="price">289.000đ</div><span class="old-price">350.000đ</span><span class="discount">-17%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="bộ xếp hình cảng biển"><span class="tag">TOY</span><div class="thumb">🧱</div><div class="heart">♡</div><div><div class="brand">BLOCK</div><div class="name">Bộ xếp hình cảng biển và xe tải</div><div class="promo">Quà tặng logistics</div><div class="price">520.000đ</div><span class="old-price">650.000đ</span><span class="discount">-20%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="gấu bông mascot giao hàng"><span class="tag">QUÀ TẶNG</span><div class="thumb">🧸</div><div class="heart">♡</div><div><div class="brand">GIFT</div><div class="name">Gấu bông mascot nhân viên giao hàng</div><div class="promo">Gói quà miễn phí</div><div class="price">159.000đ</div><span class="old-price">199.000đ</span><span class="discount">-20%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="mô hình tàu biển mini"><span class="tag">SƯU TẦM</span><div class="thumb">🛳️</div><div class="heart">♡</div><div><div class="brand">COLLECT</div><div class="name">Mô hình tàu biển mini để bàn</div><div class="promo">Hàng dễ vỡ - đóng gói kỹ</div><div class="price">199.000đ</div><span class="old-price">250.000đ</span><span class="discount">-20%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+    </div>
+  </section>
+
+  <section class="section" id="home-goods">
+    <div class="section-head"><h2>Gia dụng & hàng cồng kềnh</h2><a href="#">Xem tất cả ></a></div>
+    <div class="product-grid">
+      <div class="product-card" data-name="nồi cơm điện"><span class="tag">GIA DỤNG</span><div class="thumb">🍚</div><div class="heart">♡</div><div><div class="brand">HOME</div><div class="name">Nồi cơm điện dung tích 1.8L</div><div class="promo">Đóng thùng chống sốc</div><div class="price">690.000đ</div><span class="old-price">850.000đ</span><span class="discount">-19%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="quạt điện đứng"><span class="tag">HOT</span><div class="thumb">🌀</div><div class="heart">♡</div><div><div class="brand">HOME</div><div class="name">Quạt điện đứng điều khiển từ xa</div><div class="promo">Hàng cồng kềnh</div><div class="price">550.000đ</div><span class="old-price">690.000đ</span><span class="discount">-20%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="máy xay sinh tố"><span class="tag">SALE</span><div class="thumb">🧃</div><div class="heart">♡</div><div><div class="brand">KITCHEN</div><div class="name">Máy xay sinh tố đa năng gia đình</div><div class="promo">Bảo hiểm vận chuyển</div><div class="price">430.000đ</div><span class="old-price">520.000đ</span><span class="discount">-17%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="ghế văn phòng"><span class="tag">NỘI THẤT</span><div class="thumb">🪑</div><div class="heart">♡</div><div><div class="brand">FURNITURE</div><div class="name">Ghế văn phòng xoay lưng lưới</div><div class="promo">Cần xe tải giao hàng</div><div class="price">890.000đ</div><span class="old-price">1.100.000đ</span><span class="discount">-19%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="nệm gấp văn phòng"><span class="tag">CỒNG KỀNH</span><div class="thumb">🛏️</div><div class="heart">♡</div><div><div class="brand">BEDDING</div><div class="name">Nệm gấp văn phòng giao tận nơi</div><div class="promo">Tính phí theo quãng đường</div><div class="price">1.290.000đ</div><span class="old-price">1.590.000đ</span><span class="discount">-19%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+    </div>
+  </section>
+
+  <section class="section" id="packing">
+    <div class="section-head"><h2>Vật tư logistics & đóng gói</h2><a href="#">Xem tất cả ></a></div>
+    <div class="product-grid">
+      <div class="product-card" data-name="thùng carton"><span class="tag">LOGISTICS</span><div class="thumb">📦</div><div class="heart">♡</div><div><div class="brand">LOGIPACK</div><div class="name">Thùng carton 5 lớp đóng hàng xuất kho</div><div class="promo">Combo giảm ~ 20.000đ</div><div class="price">12.000đ</div><span class="old-price">15.000đ</span><span class="discount">-20%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="pallet gỗ"><span class="tag">KHO</span><div class="thumb">🪵</div><div class="heart">♡</div><div><div class="brand">WAREHOUSE</div><div class="name">Pallet gỗ kê hàng trong kho và container</div><div class="promo">Mua 10 giảm 5%</div><div class="price">180.000đ</div><span class="old-price">210.000đ</span><span class="discount">-14%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="màng pe quấn kiện hàng"><span class="tag">ĐÓNG GÓI</span><div class="thumb">🎞️</div><div class="heart">♡</div><div><div class="brand">PACKING</div><div class="name">Màng PE quấn kiện hàng chống bụi, chống ẩm</div><div class="promo">Combo kho vận</div><div class="price">95.000đ</div><span class="old-price">110.000đ</span><span class="discount">-13%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="tem nhãn mã vận đơn"><span class="tag">NHÃN</span><div class="thumb">🏷️</div><div class="heart">♡</div><div><div class="brand">LABEL</div><div class="name">Tem nhãn mã vận đơn cho kiện hàng</div><div class="promo">In theo yêu cầu</div><div class="price">45.000đ</div><span class="old-price">55.000đ</span><span class="discount">-18%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+      <div class="product-card" data-name="bộ dụng cụ đóng đai"><span class="tag">TOOLS</span><div class="thumb">🧰</div><div class="heart">♡</div><div><div class="brand">TOOLS</div><div class="name">Bộ dụng cụ đóng đai kiện hàng kho vận</div><div class="promo">Tặng dây đai</div><div class="price">320.000đ</div><span class="old-price">390.000đ</span><span class="discount">-18%</span></div><button class="add-btn" onclick="addToCart(this)">Thêm vào giỏ</button></div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="loginModal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="modal-header">
+      <h3 id="loginTitle">Đăng nhập LogiPort</h3>
+      <button class="close-chat" onclick="closeLoginModal()" aria-label="Đóng">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-error" id="loginError"></div>
+      <input id="loginUsername" type="text" placeholder="Username" autocomplete="username">
+      <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password">
+      <div class="modal-actions">
+        <button class="btn btn-primary" type="button" onclick="performLogin()">Đăng nhập</button>
+        <button class="btn btn-red" type="button" onclick="clearAuth()" id="logoutButton" style="display:none;">Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="floating"><div class="hotline">1900 6868</div></div>
+<footer><p>© 2026 LogiPort Mart - Trang sản phẩm</p></footer>
+<script src="script.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', initAuth);
+  (function() {
+    if (window.location.protocol === 'file:') {
+      const backendOrigin = 'http://localhost:4000';
+      fetch(`${backendOrigin}/`, { method: 'GET' })
+        .then(response => {
+          if (response.ok) {
+            const page = window.location.pathname.split('/').pop() || 'index.html';
+            window.location.href = `${backendOrigin}/${page}`;
+          }
+        })
+        .catch(() => {
+          console.warn('Backend không chạy tại localhost:4000. Vui lòng khởi động server.');
+        });
+    }
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogiPort Mart - Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="top-line"></div>
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">LOGIPORT<span>ADMIN</span></div>
+    <button class="menu-btn">☰ Dashboard</button>
+    <div class="search">
+      <input type="text" placeholder="Tìm đơn hàng, nhân viên, sản phẩm, tài xế...">
+      <button>🔍</button>
+    </div>
+    <a class="header-action auth-action" id="authAction" href="auth.html"><span class="icon">👤</span><div id="authActionText">Đăng<br>nhập</div></a>
+    <button id="logoutButtonHeader" class="btn btn-secondary logout-button" type="button" onclick="clearAuth()" style="display:none; margin-left:12px;">Đăng xuất</button>
+    <div class="header-action"><span class="icon">🔔</span><div>Thông báo<br>5 mới</div></div>
+  </div>
+</header>
+<nav class="sub-nav">
+  <div class="sub-nav-inner">
+    <a href="index.html">🛒 Sản phẩm</a>
+    <a href="logistics.html">🚚 Logistics</a>
+    <a class="active" href="admin.html">👑 Quản trị</a>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="admin-guard" id="adminGuard" aria-hidden="true">
+    <div class="guard-card">
+      <h2>Quản trị chỉ dành cho Admin</h2>
+      <p>Chỉ người dùng có quyền Admin mới được truy cập trang này. Vui lòng đăng nhập bằng tài khoản Admin.</p>
+      <a class="btn btn-primary" href="auth.html">Đăng nhập Admin</a>
+    </div>
+  </div>
+  <section class="dashboard-grid">
+    <div class="stat-card"><h3>128</h3><p>Tổng đơn hàng</p></div>
+    <div class="stat-card"><h3>35</h3><p>Đơn đang giao</p></div>
+    <div class="stat-card"><h3>12</h3><p>Xe hoạt động</p></div>
+    <div class="stat-card"><h3>86.5M</h3><p>Doanh thu demo</p></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Phân quyền bộ phận làm việc</h2><a href="#">Thêm tài khoản ></a></div>
+    <div style="padding:16px;">
+      <div class="role-grid">
+        <div class="role-card"><div class="role-icon">👑</div><h4>Admin</h4><p>Quản lý hệ thống, phân quyền, doanh thu, tài khoản và báo cáo.</p></div>
+        <div class="role-card"><div class="role-icon">🛒</div><h4>Nhân viên sản phẩm</h4><p>Thêm, sửa, xóa các nhóm sản phẩm theo danh mục.</p></div>
+        <div class="role-card"><div class="role-icon">🏭</div><h4>Nhân viên kho</h4><p>Kiểm tra tồn kho, nhập kho, xuất kho và chuẩn bị hàng.</p></div>
+        <div class="role-card"><div class="role-icon">🧭</div><h4>Điều phối</h4><p>Phân xe, phân tài xế và chạy thuật toán Greedy tuyến đường.</p></div>
+        <div class="role-card"><div class="role-icon">🚚</div><h4>Tài xế</h4><p>Nhận đơn, cập nhật GPS, trạng thái và xác nhận giao hàng.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel-grid">
+    <div class="panel">
+      <h3>Thêm/sửa sản phẩm</h3>
+      <p>Khu vực dành cho nhân viên sản phẩm.</p>
+      <input placeholder="Tên sản phẩm"><br><br>
+      <div class="form-row">
+        <input placeholder="Giá bán">
+        <select><option>Điện tử</option><option>Thời trang</option><option>Mô hình</option><option>Gia dụng</option><option>Đóng gói</option></select>
+      </div>
+      <textarea rows="4" placeholder="Mô tả sản phẩm"></textarea>
+      <br><br>
+      <button class="btn btn-primary">Lưu sản phẩm</button>
+    </div>
+
+    <div class="panel">
+      <h3>Phân công giao hàng</h3>
+      <p>Khu vực dành cho nhân viên điều phối.</p>
+      <div class="form-row">
+        <input placeholder="Mã đơn hàng">
+        <select><option>Tài xế A</option><option>Tài xế B</option><option>Tài xế C</option></select>
+      </div>
+      <div class="form-row">
+        <select><option>Xe tải 1 tấn</option><option>Xe tải 3.5 tấn</option><option>Container 20 feet</option></select>
+        <input placeholder="Tuyến giao">
+      </div>
+      <button class="btn btn-red">Phân công</button>
+    </div>
+  </section>
+
+  <section class="table-box">
+    <table>
+      <thead>
+        <tr>
+          <th>Mã đơn</th>
+          <th>Khách hàng</th>
+          <th>Bộ phận xử lý</th>
+          <th>Trạng thái</th>
+          <th>Tài xế</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>LG20260620-001</td>
+          <td>Nguyễn Văn A</td>
+          <td>Điều phối</td>
+          <td><span class="status ship">Đang giao</span></td>
+          <td>Tài xế A</td>
+        </tr>
+        <tr>
+          <td>LG20260620-002</td>
+          <td>Trần Thị B</td>
+          <td>Kho vận</td>
+          <td><span class="status pending">Chờ xuất kho</span></td>
+          <td>Chưa phân</td>
+        </tr>
+        <tr>
+          <td>LG20260620-003</td>
+          <td>Lê Minh C</td>
+          <td>CSKH</td>
+          <td><span class="status ok">Hoàn tất</span></td>
+          <td>Tài xế B</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Danh sách tài khoản</h2>
+      <a href="#" onclick="loadUserList(); return false;">Tải lại</a>
+    </div>
+    <div class="user-list" id="userListContainer">
+      <p>Đăng nhập bằng tài khoản Admin để xem danh sách tài khoản.</p>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="loginModal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="modal-header">
+      <h3 id="loginTitle">Đăng nhập LogiPort</h3>
+      <button class="close-chat" onclick="closeLoginModal()" aria-label="Đóng">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-error" id="loginError"></div>
+      <input id="loginUsername" type="text" placeholder="Username" autocomplete="username">
+      <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password">
+      <div class="modal-actions">
+        <button class="btn btn-primary" type="button" onclick="performLogin()">Đăng nhập</button>
+        <button class="btn btn-red" type="button" onclick="clearAuth()" id="logoutButton" style="display:none;">Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="floating"><div class="hotline">Admin Panel</div></div>
+<footer><p>© 2026 LogiPort Mart - Trang quản trị</p></footer>
+<script src="script.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', initAuth);
+</script>

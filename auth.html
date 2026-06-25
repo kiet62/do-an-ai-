@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogiPort Mart - Đăng nhập / Đăng ký</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="top-line"></div>
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">LOGIPORT<span>MART.COM</span></div>
+      <button class="menu-btn">☰ Tài khoản</button>
+      <div class="header-action">
+        <span class="icon">👤</span>
+        <div id="authActionText">Đăng nhập<br>Đăng ký</div>
+        <button id="logoutButton" class="btn btn-secondary" type="button" onclick="clearAuth()" style="display:none; margin-left:10px;">Đăng xuất</button>
+      </div>
+    </div>
+  </header>
+  <nav class="sub-nav">
+    <div class="sub-nav-inner">
+      <a href="index.html">🛒 Sản phẩm</a>
+      <a href="logistics.html">🚚 Logistics</a>
+      <a href="admin.html">👑 Quản trị</a>
+    </div>
+  </nav>
+
+  <main class="main auth-main">
+    <section class="auth-page">
+      <div class="auth-panel">
+        <div class="auth-hero">
+          <h1>Chào mừng đến với LogiPort Mart</h1>
+          <p>Đăng nhập để quản lý đơn hàng hoặc đăng ký để mua sắm nhanh chóng. Tài khoản khách hàng sẽ được lưu trữ ngay lập tức.</p>
+        </div>
+        <div class="auth-card">
+          <div class="auth-tabs">
+            <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Đăng nhập</button>
+            <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Đăng ký</button>
+          </div>
+
+          <div class="auth-form" id="loginForm">
+            <div class="form-group">
+              <label for="loginUsername">Username</label>
+              <input id="loginUsername" type="text" placeholder="Nhập username" autocomplete="username">
+            </div>
+            <div class="form-group">
+              <label for="loginPassword">Password</label>
+              <input id="loginPassword" type="password" placeholder="Nhập password" autocomplete="current-password">
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="button" onclick="performLogin()">Đăng nhập</button>
+            </div>
+            <div class="auth-note">Bạn chưa có tài khoản? Chuyển sang tab Đăng ký.</div>
+          </div>
+
+          <div class="auth-form" id="registerForm" style="display:none;">
+            <div class="form-group">
+              <label for="registerName">Họ và tên</label>
+              <input id="registerName" type="text" placeholder="Nhập họ tên">
+            </div>
+            <div class="form-group">
+              <label for="registerUsername">Username</label>
+              <input id="registerUsername" type="text" placeholder="Chọn username" autocomplete="username">
+            </div>
+            <div class="form-group">
+              <label for="registerPassword">Password</label>
+              <input id="registerPassword" type="password" placeholder="Chọn password" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <label for="registerConfirmPassword">Xác nhận Password</label>
+              <input id="registerConfirmPassword" type="password" placeholder="Nhập lại password" autocomplete="new-password">
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="button" onclick="performRegister()">Đăng ký</button>
+            </div>
+            <div class="auth-note">Tài khoản mới sẽ được tạo dưới dạng khách hàng.</div>
+          </div>
+
+          <div class="auth-feedback" id="authFeedback"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><p>© 2026 LogiPort Mart - Đăng nhập / Đăng ký</p></footer>
+  <script src="script.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      initAuth();
+      if (typeof switchAuthTab === 'function') {
+        switchAuthTab('login');
+      }
+    });
+    (function() {
+      if (window.location.protocol === 'file:') {
+        const backendOrigin = 'http://localhost:4000';
+        fetch(`${backendOrigin}/`, { method: 'GET' })
+          .then(response => {
+            if (response.ok) {
+              const page = window.location.pathname.split('/').pop() || 'auth.html';
+              window.location.href = `${backendOrigin}/${page}`;
+            }
+          })
+          .catch(() => {
+            console.warn('Backend không chạy tại localhost:4000. Vui lòng khởi động server.');
+          });
+      }
+    })();
+  </script>
+</body>
+</html>

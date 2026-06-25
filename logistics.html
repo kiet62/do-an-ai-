@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogiPort Mart - Logistics</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="top-line"></div>
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">LOGIPORT<span>MART.COM</span></div>
+    <button class="menu-btn">☰ Dịch vụ</button>
+    <div class="search">
+      <input type="text" placeholder="Tìm dịch vụ vận chuyển, kho bãi, hải quan, mã đơn...">
+      <button>🔍</button>
+    </div>
+    <div class="header-action"><span class="icon">☎</span><div>Hotline<br>1900.5301</div></div>
+    <div class="header-action"><span class="icon">📦</span><div>Tra cứu<br>đơn hàng</div></div>
+    <a class="header-action auth-action" id="authAction" href="auth.html"><span class="icon">👤</span><div id="authActionText">Đăng<br>nhập</div></a>
+    <button id="logoutButtonHeader" class="btn btn-secondary logout-button" type="button" onclick="clearAuth()" style="display:none; margin-left:12px;">Đăng xuất</button>
+  </div>
+</header>
+<nav class="sub-nav">
+  <div class="sub-nav-inner">
+    <a href="index.html">🛒 Sản phẩm</a>
+    <a class="active" href="logistics.html">🚚 Logistics</a>
+    <a href="admin.html">👑 Quản trị</a>
+  </div>
+</nav>
+
+<main class="main">
+  <section class="hero-layout" style="grid-template-columns:1fr;">
+    <section class="banner-grid">
+      <div class="big-banner">
+        <div class="date">Logistics Module</div>
+        <h1>Quản lý vận chuyển, tracking map và Greedy Route</h1>
+        <p>Trang này chỉ để các chức năng logistics: đặt vận chuyển, tra cứu đơn, bản đồ giao hàng, kho bãi, hải quan và tối ưu tuyến đường.</p>
+        <div class="ship">🚚</div>
+      </div>
+      <div class="small-banner"><h3>Tracking</h3><p>Tra cứu đơn hàng</p><div class="emoji">📍</div></div>
+      <div class="small-banner"><h3>Greedy</h3><p>Gợi ý tuyến giao</p><div class="emoji">🧭</div></div>
+    </section>
+  </section>
+
+  <section class="section" id="service">
+    <div class="section-head"><h2>Dịch vụ logistics</h2><a href="#">Xem tất cả ></a></div>
+    <div class="product-grid">
+      <div class="product-card" data-name="vận chuyển hàng từ cảng"><span class="tag">TRACKING</span><div class="thumb">🚚</div><div class="heart">♡</div><div><div class="brand">TRANSPORT</div><div class="name">Vận chuyển hàng từ cảng đến kho</div><div class="promo">Có bản đồ realtime</div><div class="price">Từ 450.000đ</div><span class="old-price">550.000đ</span><span class="discount">-18%</span></div><button class="add-btn" onclick="addToCart(this)">Đặt dịch vụ</button></div>
+      <div class="product-card" data-name="giao nhận hàng hóa tại cảng"><span class="tag">CẢNG</span><div class="thumb">🚢</div><div class="heart">♡</div><div><div class="brand">PORT SERVICE</div><div class="name">Giao nhận hàng hóa tại cảng biển</div><div class="promo">Hỗ trợ chứng từ</div><div class="price">Từ 800.000đ</div><span class="old-price">950.000đ</span><span class="discount">-16%</span></div><button class="add-btn" onclick="addToCart(this)">Đặt dịch vụ</button></div>
+      <div class="product-card" data-name="dịch vụ lưu kho"><span class="tag">KHO BÃI</span><div class="thumb">🏭</div><div class="heart">♡</div><div><div class="brand">WAREHOUSE</div><div class="name">Dịch vụ lưu kho, nhập kho, xuất kho</div><div class="promo">Giảm tháng đầu</div><div class="price">Từ 1.200.000đ</div><span class="old-price">1.500.000đ</span><span class="discount">-20%</span></div><button class="add-btn" onclick="addToCart(this)">Đặt dịch vụ</button></div>
+      <div class="product-card" data-name="khai báo hải quan"><span class="tag">HẢI QUAN</span><div class="thumb">🧾</div><div class="heart">♡</div><div><div class="brand">CUSTOMS</div><div class="name">Khai báo hải quan và xử lý chứng từ</div><div class="promo">Tư vấn miễn phí</div><div class="price">Từ 650.000đ</div><span class="old-price">780.000đ</span><span class="discount">-17%</span></div><button class="add-btn" onclick="addToCart(this)">Đặt dịch vụ</button></div>
+      <div class="product-card" data-name="greedy route tối ưu tuyến giao"><span class="tag">GREEDY</span><div class="thumb">🧭</div><div class="heart">♡</div><div><div class="brand">ROUTE AI</div><div class="name">Tối ưu tuyến giao nhiều điểm bằng Greedy</div><div class="promo">Gợi ý tuyến nhanh</div><div class="price">Tích hợp</div><span class="old-price">Nâng cao</span><span class="discount">HOT</span></div><button class="add-btn" onclick="runGreedy()">Chạy thử</button></div>
+    </div>
+  </section>
+
+  <section class="panel-grid" id="tracking">
+    <div class="panel">
+      <h3>Tra cứu đơn logistics</h3>
+      <p>Khách hàng nhập mã đơn để xem trạng thái vận chuyển và email xác nhận.</p>
+      <div class="form-row">
+        <input id="trackingCode" type="text" placeholder="Mã đơn: LG20260620-001">
+        <select>
+          <option>Khách hàng</option>
+          <option>Nhân viên kho</option>
+          <option>Nhân viên điều phối</option>
+          <option>Tài xế</option>
+          <option>Admin</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="trackOrder()">Theo dõi đơn hàng</button>
+      <div class="result-box" id="trackingResult"></div>
+    </div>
+
+    <div class="panel" id="map">
+      <h3>Bản đồ giao hàng demo</h3>
+      <p>Khách hàng xem xe đang đi đến điểm nào và thời gian dự kiến giao.</p>
+      <div class="map-box">
+        <div class="route-line"></div>
+        <div class="point a">A</div><div class="point b">B</div><div class="point c">C</div><div class="point d">D</div>
+        <div class="truck">🚚</div>
+        <div class="eta"><strong>Xe đang vận chuyển</strong>Cảng Cát Lái → Bình Dương<br>ETA: 45 phút</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel-grid">
+    <div class="panel">
+      <h3>Form đặt vận chuyển</h3>
+      <p>Khách nhập thông tin lấy hàng và giao hàng.</p>
+      <div class="form-row">
+        <input placeholder="Điểm lấy hàng">
+        <input placeholder="Điểm giao hàng">
+      </div>
+      <div class="form-row">
+        <select><option>Xe tải nhỏ</option><option>Container 20 feet</option><option>Container 40 feet</option></select>
+        <input placeholder="Khối lượng hàng">
+      </div>
+      <textarea rows="4" placeholder="Ghi chú hàng hóa"></textarea>
+      <br><br>
+      <button class="btn btn-red">Gửi yêu cầu vận chuyển</button>
+    </div>
+
+    <div class="panel">
+      <h3>Thuật toán Greedy Route</h3>
+      <p>Hệ thống chọn điểm giao gần nhất ở mỗi bước để đề xuất tuyến đi.</p>
+      <button class="btn btn-primary" onclick="runGreedy()">Chạy Greedy demo</button>
+      <div class="result-box" id="greedyResult"></div>
+    </div>
+  </section>
+</main>
+<div class="floating"><div class="hotline">1900 6868</div></div>
+<footer><p>© 2026 LogiPort Mart - Trang logistics</p></footer>
+<script src="script.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', initAuth);
+</script>
+</body>
+</html>
