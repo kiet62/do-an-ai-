@@ -12,6 +12,8 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || 'logiport_demo_secret';
 const DB_PATH = process.env.SQLITE_DB_PATH || path.join(__dirname, 'database.sqlite');
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
@@ -194,6 +196,59 @@ app.post('/api/assign', authenticateToken, authorizeRole(['admin']), (req, res) 
 app.get('/api/users', authenticateToken, authorizeRole(['admin']), async (req, res) => {
   const usersList = await dbAll('SELECT id, username, role, displayName FROM users');
   res.json({ users: usersList });
+});
+
+app.post('/api/chat', async (req, res) => {
+  const { message, history = [] } = req.body;
+  if (!message || typeof message !== 'string') {
+    return res.status(400).json({ message: 'Vui lòng nhập nội dung cần hỗ trợ.' });
+  }
+
+  if (!OPENAI_API_KEY) {
+    return res.status(503).json({
+      message: 'Chat AI chưa được cấu hình OPENAI_API_KEY trên server.'
+    });
+  }
+
+  const safeHistory = Array.isArray(history)
+    ? history.slice(-8).filter(item => item && ['user', 'assistant'].includes(item.role) && typeof item.content === 'string')
+    : [];
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: OPENAI_MODEL,
+        input: [
+          {
+            role: 'system',
+            content: 'Bạn là trợ lý chăm sóc khách hàng cho LogiPort Mart. Trả lời ngắn gọn bằng tiếng Việt, hỗ trợ tìm sản phẩm, giỏ hàng, thanh toán, tra cứu đơn hàng và dịch vụ logistics. Nếu khách hỏi thông tin ngoài phạm vi web, hãy hướng dẫn lịch sự.'
+          },
+          ...safeHistory,
+          { role: 'user', content: message }
+        ]
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('OpenAI API error:', data);
+      return res.status(502).json({ message: 'Chat AI đang bận. Vui lòng thử lại sau.' });
+    }
+
+    const reply = data.output_text
+      || data.output?.flatMap(item => item.content || []).map(item => item.text || '').join('').trim()
+      || 'Mình chưa có câu trả lời phù hợp. Bạn vui lòng hỏi lại ngắn hơn nhé.';
+
+    res.json({ reply });
+  } catch (error) {
+    console.error('Chat API error:', error);
+    res.status(500).json({ message: 'Không thể kết nối Chat AI lúc này.' });
+  }
 });
 
 initDatabase()

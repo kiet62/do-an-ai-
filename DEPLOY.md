@@ -12,6 +12,8 @@
    - Env vars:
      - `JWT_SECRET`: mot chuoi bi mat bat ky
      - `SQLITE_DB_PATH`: `/tmp/database.sqlite`
+     - `OPENAI_API_KEY`: API key trong OpenAI Platform
+     - `OPENAI_MODEL`: `gpt-4o-mini`
 
 ## Local
 

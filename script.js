@@ -611,7 +611,103 @@ async function loadUserList() {
   }
 }
 
+const CHAT_HISTORY_KEY = 'logiport_chat_history';
+let chatMessages = [];
+
+function initChatBox() {
+  if (document.getElementById('aiChatWidget')) return;
+
+  try {
+    chatMessages = JSON.parse(localStorage.getItem(CHAT_HISTORY_KEY) || '[]');
+  } catch {
+    chatMessages = [];
+  }
+
+  const widget = document.createElement('div');
+  widget.className = 'ai-chat-widget';
+  widget.id = 'aiChatWidget';
+  widget.innerHTML = `
+    <button class="ai-chat-toggle" type="button" onclick="toggleChatBox()" aria-label="Mở chat AI">AI</button>
+    <section class="ai-chat-panel" id="aiChatPanel" aria-live="polite">
+      <div class="ai-chat-head">
+        <div>
+          <strong>LogiPort AI</strong>
+          <span>Hỗ trợ mua hàng và vận chuyển</span>
+        </div>
+        <button type="button" onclick="toggleChatBox(false)" aria-label="Đóng chat">×</button>
+      </div>
+      <div class="ai-chat-messages" id="aiChatMessages"></div>
+      <form class="ai-chat-form" onsubmit="sendChatMessage(event)">
+        <input id="aiChatInput" type="text" placeholder="Nhập câu hỏi..." autocomplete="off">
+        <button type="submit">Gửi</button>
+      </form>
+    </section>
+  `;
+  document.body.appendChild(widget);
+
+  if (!chatMessages.length) {
+    chatMessages = [{
+      role: 'assistant',
+      content: 'Xin chào! Mình có thể hỗ trợ tìm sản phẩm, kiểm tra giỏ hàng, tra cứu mã đơn hoặc tư vấn dịch vụ logistics.'
+    }];
+  }
+  renderChatMessages();
+}
+
+function toggleChatBox(forceOpen) {
+  const panel = document.getElementById('aiChatPanel');
+  if (!panel) return;
+  const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !panel.classList.contains('open');
+  panel.classList.toggle('open', shouldOpen);
+  if (shouldOpen) {
+    setTimeout(() => document.getElementById('aiChatInput')?.focus(), 50);
+  }
+}
+
+function renderChatMessages() {
+  const box = document.getElementById('aiChatMessages');
+  if (!box) return;
+  box.innerHTML = chatMessages.map(item => `
+    <div class="ai-chat-bubble ${item.role === 'user' ? 'user' : 'assistant'}">${escapeHtml(item.content)}</div>
+  `).join('');
+  box.scrollTop = box.scrollHeight;
+  localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(chatMessages.slice(-12)));
+}
+
+async function sendChatMessage(event) {
+  event.preventDefault();
+  const input = document.getElementById('aiChatInput');
+  const message = input?.value.trim();
+  if (!message) return;
+
+  input.value = '';
+  chatMessages.push({ role: 'user', content: message });
+  chatMessages.push({ role: 'assistant', content: 'Đang trả lời...' });
+  renderChatMessages();
+
+  try {
+    const response = await fetch(`${API_BASE}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        history: chatMessages.filter(item => item.content !== 'Đang trả lời...').slice(-8)
+      })
+    });
+    const data = await response.json();
+    chatMessages.pop();
+    chatMessages.push({ role: 'assistant', content: response.ok ? data.reply : (data.message || 'Chat AI đang bận. Vui lòng thử lại sau.') });
+  } catch (error) {
+    console.error(error);
+    chatMessages.pop();
+    chatMessages.push({ role: 'assistant', content: 'Không kết nối được Chat AI. Bạn thử lại sau nhé.' });
+  }
+
+  renderChatMessages();
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initCart();
+  initChatBox();
 });
