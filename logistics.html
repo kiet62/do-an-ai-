@@ -96,31 +96,6 @@ Bình Dương</textarea>
     </div>
   </section>
 
-  <section class="panel-grid">
-    <div class="panel" id="warehousePanel">
-      <h3>Kho bãi và lưu trữ</h3>
-      <p>Tính nhanh phí lưu kho theo số pallet và số ngày lưu.</p>
-      <div class="form-row">
-        <input id="warehousePallets" type="number" min="1" placeholder="Số pallet">
-        <input id="warehouseDays" type="number" min="1" placeholder="Số ngày lưu kho">
-      </div>
-      <button class="btn btn-primary" type="button" onclick="calculateWarehouseFee()">Tính phí lưu kho</button>
-      <div class="result-box" id="warehouseResult"></div>
-    </div>
-
-    <div class="panel" id="customsPanel">
-      <h3>Hải quan và chứng từ</h3>
-      <p>Kiểm tra nhanh bộ hồ sơ khai báo hải quan cơ bản.</p>
-      <div class="logistics-checks">
-        <label><input type="checkbox" class="customs-doc" value="Hóa đơn thương mại"> Hóa đơn thương mại</label>
-        <label><input type="checkbox" class="customs-doc" value="Packing list"> Packing list</label>
-        <label><input type="checkbox" class="customs-doc" value="Vận đơn"> Vận đơn</label>
-        <label><input type="checkbox" class="customs-doc" value="Tờ khai hải quan"> Tờ khai hải quan</label>
-      </div>
-      <button class="btn btn-red" type="button" onclick="checkCustomsDocs()">Kiểm tra hồ sơ</button>
-      <div class="result-box" id="customsResult"></div>
-    </div>
-  </section>
 </main>
 <div class="floating"><div class="hotline">1900 6868</div></div>
 <footer><p>© 2026 LogiPort Mart - Trang logistics</p></footer>
