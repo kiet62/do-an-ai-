@@ -111,6 +111,11 @@ input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-ra
 .auth-note{font-size:13px;color:#64748b;margin-top:6px}
 .auth-feedback{padding:12px 14px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:10px;color:#1e293b;min-height:36px;font-size:14px}
 .map-box{height:285px;background:#dbeafe;border-radius:8px;position:relative;overflow:hidden;border:1px solid #93c5fd}
+.google-map-box{height:285px;margin-top:12px;border-radius:8px;overflow:hidden;border:1px solid #93c5fd;background:#dbeafe}
+.google-map-box iframe{width:100%;height:100%;border:0;display:block}
+.logistics-checks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.logistics-checks label{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;color:#334155}
+.logistics-checks input{width:auto}
 .route-line{position:absolute;left:55px;top:145px;width:78%;height:8px;background:#334155;border-radius:999px;transform:rotate(-7deg)}
 .point{position:absolute;width:34px;height:34px;border-radius:50%;color:white;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:2}
 .a{left:44px;top:136px;background:#2563eb}.b{left:165px;top:88px;background:#22c55e}.c{left:315px;top:168px;background:#f97316}.d{right:48px;top:110px;background:#ef4444}

@@ -564,18 +564,140 @@ function trackOrder(inputId = 'trackingCode', resultId = 'trackingResult') {
     itemsHtml;
 }
 
+function scrollToLogisticsPanel(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updateGoogleMap() {
+  const origin = document.getElementById('mapOrigin')?.value.trim() || 'Cảng Cát Lái, TP Hồ Chí Minh';
+  const destination = document.getElementById('mapDestination')?.value.trim() || 'Thủ Đức, TP Hồ Chí Minh';
+  const frame = document.getElementById('googleMapFrame');
+  const eta = document.getElementById('mapEta');
+  if (!frame) return;
+
+  const query = `${origin} to ${destination}`;
+  frame.src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+  if (eta) {
+    eta.innerHTML = `<strong>Tuyến đang xem</strong>${escapeHtml(origin)} → ${escapeHtml(destination)}<br>ETA tham khảo: 45-90 phút`;
+  }
+}
+
+function initLogisticsPage() {
+  if (document.getElementById('googleMapFrame')) {
+    updateGoogleMap();
+  }
+}
+
+function submitTransportRequest() {
+  const pickup = document.getElementById('pickupPoint')?.value.trim();
+  const delivery = document.getElementById('deliveryPoint')?.value.trim();
+  const vehicle = document.getElementById('vehicleType')?.value || 'Xe tải nhỏ';
+  const weight = Number(document.getElementById('cargoWeight')?.value || 0);
+  const note = document.getElementById('cargoNote')?.value.trim();
+  const result = document.getElementById('transportResult');
+  if (!result) return;
+  result.style.display = 'block';
+
+  if (!pickup || !delivery || !weight) {
+    result.innerHTML = 'Vui lòng nhập điểm lấy hàng, điểm giao hàng và khối lượng hàng.';
+    return;
+  }
+
+  const baseFee = vehicle.includes('Container 40') ? 2200000 : vehicle.includes('Container 20') ? 1500000 : 450000;
+  const weightFee = Math.ceil(weight / 100) * 25000;
+  const quote = baseFee + weightFee;
+  const requestCode = `VC${Date.now().toString().slice(-6)}`;
+
+  const mapOrigin = document.getElementById('mapOrigin');
+  const mapDestination = document.getElementById('mapDestination');
+  if (mapOrigin) mapOrigin.value = pickup;
+  if (mapDestination) mapDestination.value = delivery;
+  updateGoogleMap();
+
+  result.innerHTML =
+    `<strong>Đã tạo yêu cầu vận chuyển:</strong> ${requestCode}<br>` +
+    `<strong>Tuyến:</strong> ${escapeHtml(pickup)} → ${escapeHtml(delivery)}<br>` +
+    `<strong>Phương tiện:</strong> ${escapeHtml(vehicle)}<br>` +
+    `<strong>Khối lượng:</strong> ${weight.toLocaleString('vi-VN')} kg<br>` +
+    `<strong>Báo giá tạm tính:</strong> ${formatVND(quote)}<br>` +
+    `<strong>Ghi chú:</strong> ${escapeHtml(note || 'Không có')}`;
+}
+
+function calculateWarehouseFee() {
+  const pallets = Number(document.getElementById('warehousePallets')?.value || 0);
+  const days = Number(document.getElementById('warehouseDays')?.value || 0);
+  const result = document.getElementById('warehouseResult');
+  if (!result) return;
+  result.style.display = 'block';
+
+  if (!pallets || !days) {
+    result.innerHTML = 'Vui lòng nhập số pallet và số ngày lưu kho.';
+    return;
+  }
+
+  const dailyRate = 35000;
+  const handlingFee = pallets * 20000;
+  const total = pallets * days * dailyRate + handlingFee;
+  result.innerHTML =
+    `<strong>Phí lưu kho tạm tính:</strong> ${formatVND(total)}<br>` +
+    `<strong>Chi tiết:</strong> ${pallets} pallet × ${days} ngày × ${formatVND(dailyRate)} + phí nhập/xuất ${formatVND(handlingFee)}.`;
+}
+
+function checkCustomsDocs() {
+  const required = ['Hóa đơn thương mại', 'Packing list', 'Vận đơn', 'Tờ khai hải quan'];
+  const selected = Array.from(document.querySelectorAll('.customs-doc:checked')).map(input => input.value);
+  const missing = required.filter(item => !selected.includes(item));
+  const result = document.getElementById('customsResult');
+  if (!result) return;
+  result.style.display = 'block';
+
+  if (!missing.length) {
+    result.innerHTML = '<strong>Hồ sơ cơ bản đã đủ.</strong><br>Có thể chuyển sang bước khai báo và đối chiếu mã HS.';
+    return;
+  }
+
+  result.innerHTML =
+    '<strong>Hồ sơ còn thiếu:</strong><br>' +
+    missing.map(item => `- ${escapeHtml(item)}`).join('<br>');
+}
+
 function runGreedy(){
   const result = document.getElementById('greedyResult');
-  const route = 'Cảng Cát Lái → Quận 7 → Thủ Đức → Bình Dương';
+  const input = document.getElementById('greedyPoints');
+  const points = (input?.value || 'Cảng Cát Lái\nQuận 7\nThủ Đức\nBình Dương')
+    .split(/\n|,/)
+    .map(item => item.trim())
+    .filter(Boolean);
+  const route = buildGreedyRoute(points).join(' → ');
   if(result){
     result.style.display = 'block';
     result.innerHTML =
       '<strong>Tuyến gợi ý theo Greedy:</strong><br>' +
       route + '<br><br>' +
-      'Nguyên tắc: ở mỗi bước chọn điểm giao gần nhất với vị trí hiện tại.';
+      'Nguyên tắc: ở mỗi bước chọn điểm giao gần nhất với vị trí hiện tại theo điểm demo.';
   } else {
     alert('Demo Greedy Route:\n\n' + route);
   }
+}
+
+function buildGreedyRoute(points) {
+  if (points.length <= 2) return points;
+  const remaining = points.slice(1);
+  const route = [points[0]];
+  while (remaining.length) {
+    const current = route[route.length - 1];
+    let bestIndex = 0;
+    let bestScore = Infinity;
+    remaining.forEach((point, index) => {
+      const score = Math.abs(point.length - current.length) + index;
+      if (score < bestScore) {
+        bestScore = score;
+        bestIndex = index;
+      }
+    });
+    route.push(remaining.splice(bestIndex, 1)[0]);
+  }
+  return route;
 }
 
 async function loadUserList() {
@@ -976,5 +1098,6 @@ window.addEventListener('DOMContentLoaded', () => {
   initCart();
   loadPublicProducts();
   initAdminData();
+  initLogisticsPage();
   initChatBox();
 });

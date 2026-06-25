@@ -48,11 +48,11 @@
   <section class="section" id="service">
     <div class="section-head"><h2>Dịch vụ logistics</h2><a href="#">Xem tất cả ></a></div>
     <div class="product-grid">
-      <div class="product-card" data-name="vận chuyển hàng từ cảng"><span class="tag">TRACKING</span><div class="thumb">🚚</div><div class="heart">♡</div><div><div class="brand">TRANSPORT</div><div class="name">Vận chuyển hàng từ cảng đến kho</div><div class="promo">Có bản đồ realtime</div><div class="price">Từ 450.000đ</div><span class="old-price">550.000đ</span><span class="discount">-18%</span></div><button class="add-btn" onclick="addToCart(this)">Đặt dịch vụ</button></div>
-      <div class="product-card" data-name="giao nhận hàng hóa tại cảng"><span class="tag">CẢNG</span><div class="thumb">🚢</div><div class="heart">♡</div><div><div class="brand">PORT SERVICE</div><div class="name">Giao nhận hàng hóa tại cảng biển</div><div class="promo">Hỗ trợ chứng từ</div><div class="price">Từ 800.000đ</div><span class="old-price">950.000đ</span><span class="discount">-16%</span></div><button class="add-btn" onclick="addToCart(this)">Đặt dịch vụ</button></div>
-      <div class="product-card" data-name="dịch vụ lưu kho"><span class="tag">KHO BÃI</span><div class="thumb">🏭</div><div class="heart">♡</div><div><div class="brand">WAREHOUSE</div><div class="name">Dịch vụ lưu kho, nhập kho, xuất kho</div><div class="promo">Giảm tháng đầu</div><div class="price">Từ 1.200.000đ</div><span class="old-price">1.500.000đ</span><span class="discount">-20%</span></div><button class="add-btn" onclick="addToCart(this)">Đặt dịch vụ</button></div>
-      <div class="product-card" data-name="khai báo hải quan"><span class="tag">HẢI QUAN</span><div class="thumb">🧾</div><div class="heart">♡</div><div><div class="brand">CUSTOMS</div><div class="name">Khai báo hải quan và xử lý chứng từ</div><div class="promo">Tư vấn miễn phí</div><div class="price">Từ 650.000đ</div><span class="old-price">780.000đ</span><span class="discount">-17%</span></div><button class="add-btn" onclick="addToCart(this)">Đặt dịch vụ</button></div>
-      <div class="product-card" data-name="greedy route tối ưu tuyến giao"><span class="tag">GREEDY</span><div class="thumb">🧭</div><div class="heart">♡</div><div><div class="brand">ROUTE AI</div><div class="name">Tối ưu tuyến giao nhiều điểm bằng Greedy</div><div class="promo">Gợi ý tuyến nhanh</div><div class="price">Tích hợp</div><span class="old-price">Nâng cao</span><span class="discount">HOT</span></div><button class="add-btn" onclick="runGreedy()">Chạy thử</button></div>
+      <div class="product-card" data-name="vận chuyển hàng từ cảng"><span class="tag">TRACKING</span><div class="thumb">🚚</div><div class="heart">♡</div><div><div class="brand">TRANSPORT</div><div class="name">Vận chuyển hàng từ cảng đến kho</div><div class="promo">Có bản đồ Google Maps</div><div class="price">Từ 450.000đ</div><span class="old-price">550.000đ</span><span class="discount">-18%</span></div><button class="add-btn" onclick="scrollToLogisticsPanel('transportForm')">Đặt dịch vụ</button></div>
+      <div class="product-card" data-name="giao nhận hàng hóa tại cảng"><span class="tag">CẢNG</span><div class="thumb">🚢</div><div class="heart">♡</div><div><div class="brand">PORT SERVICE</div><div class="name">Giao nhận hàng hóa tại cảng biển</div><div class="promo">Hỗ trợ chứng từ</div><div class="price">Từ 800.000đ</div><span class="old-price">950.000đ</span><span class="discount">-16%</span></div><button class="add-btn" onclick="scrollToLogisticsPanel('customsPanel')">Tư vấn</button></div>
+      <div class="product-card" data-name="dịch vụ lưu kho"><span class="tag">KHO BÃI</span><div class="thumb">🏭</div><div class="heart">♡</div><div><div class="brand">WAREHOUSE</div><div class="name">Dịch vụ lưu kho, nhập kho, xuất kho</div><div class="promo">Tính phí lưu kho nhanh</div><div class="price">Từ 1.200.000đ</div><span class="old-price">1.500.000đ</span><span class="discount">-20%</span></div><button class="add-btn" onclick="scrollToLogisticsPanel('warehousePanel')">Tính phí</button></div>
+      <div class="product-card" data-name="khai báo hải quan"><span class="tag">HẢI QUAN</span><div class="thumb">🧾</div><div class="heart">♡</div><div><div class="brand">CUSTOMS</div><div class="name">Khai báo hải quan và xử lý chứng từ</div><div class="promo">Checklist hồ sơ</div><div class="price">Từ 650.000đ</div><span class="old-price">780.000đ</span><span class="discount">-17%</span></div><button class="add-btn" onclick="scrollToLogisticsPanel('customsPanel')">Kiểm tra</button></div>
+      <div class="product-card" data-name="greedy route tối ưu tuyến giao"><span class="tag">GREEDY</span><div class="thumb">🧭</div><div class="heart">♡</div><div><div class="brand">ROUTE AI</div><div class="name">Tối ưu tuyến giao nhiều điểm bằng Greedy</div><div class="promo">Gợi ý tuyến nhanh</div><div class="price">Tích hợp</div><span class="old-price">Nâng cao</span><span class="discount">HOT</span></div><button class="add-btn" onclick="scrollToLogisticsPanel('greedyPanel')">Chạy thử</button></div>
     </div>
   </section>
 
@@ -75,39 +75,74 @@
     </div>
 
     <div class="panel" id="map">
-      <h3>Bản đồ giao hàng demo</h3>
-      <p>Khách hàng xem xe đang đi đến điểm nào và thời gian dự kiến giao.</p>
-      <div class="map-box">
-        <div class="route-line"></div>
-        <div class="point a">A</div><div class="point b">B</div><div class="point c">C</div><div class="point d">D</div>
-        <div class="truck">🚚</div>
-        <div class="eta"><strong>Xe đang vận chuyển</strong>Cảng Cát Lái → Bình Dương<br>ETA: 45 phút</div>
+      <h3>Bản đồ Google Maps</h3>
+      <p>Cập nhật điểm lấy hàng và điểm giao để xem tuyến đường trên Google Maps.</p>
+      <div class="form-row">
+        <input id="mapOrigin" type="text" value="Cảng Cát Lái, TP Hồ Chí Minh" placeholder="Điểm lấy hàng">
+        <input id="mapDestination" type="text" value="Thủ Đức, TP Hồ Chí Minh" placeholder="Điểm giao hàng">
       </div>
+      <button class="btn btn-primary" type="button" onclick="updateGoogleMap()">Cập nhật bản đồ</button>
+      <div class="google-map-box">
+        <iframe id="googleMapFrame" title="Google Maps tuyến giao hàng" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="eta" id="mapEta"><strong>Tuyến mẫu</strong>Cảng Cát Lái → Thủ Đức<br>ETA tham khảo: 45 phút</div>
     </div>
   </section>
 
   <section class="panel-grid">
-    <div class="panel">
+    <div class="panel" id="transportForm">
       <h3>Form đặt vận chuyển</h3>
       <p>Khách nhập thông tin lấy hàng và giao hàng.</p>
       <div class="form-row">
-        <input placeholder="Điểm lấy hàng">
-        <input placeholder="Điểm giao hàng">
+        <input id="pickupPoint" placeholder="Điểm lấy hàng" value="Cảng Cát Lái, TP Hồ Chí Minh">
+        <input id="deliveryPoint" placeholder="Điểm giao hàng" value="Thủ Đức, TP Hồ Chí Minh">
       </div>
       <div class="form-row">
-        <select><option>Xe tải nhỏ</option><option>Container 20 feet</option><option>Container 40 feet</option></select>
-        <input placeholder="Khối lượng hàng">
+        <select id="vehicleType"><option>Xe tải nhỏ</option><option>Container 20 feet</option><option>Container 40 feet</option></select>
+        <input id="cargoWeight" type="number" min="1" placeholder="Khối lượng hàng (kg)">
       </div>
-      <textarea rows="4" placeholder="Ghi chú hàng hóa"></textarea>
+      <textarea id="cargoNote" rows="4" placeholder="Ghi chú hàng hóa"></textarea>
       <br><br>
-      <button class="btn btn-red">Gửi yêu cầu vận chuyển</button>
+      <button class="btn btn-red" type="button" onclick="submitTransportRequest()">Gửi yêu cầu vận chuyển</button>
+      <div class="result-box" id="transportResult"></div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="greedyPanel">
       <h3>Thuật toán Greedy Route</h3>
       <p>Hệ thống chọn điểm giao gần nhất ở mỗi bước để đề xuất tuyến đi.</p>
+      <textarea id="greedyPoints" rows="4" placeholder="Nhập các điểm giao, mỗi dòng một điểm">Cảng Cát Lái
+Quận 7
+Thủ Đức
+Bình Dương</textarea>
+      <br><br>
       <button class="btn btn-primary" onclick="runGreedy()">Chạy Greedy demo</button>
       <div class="result-box" id="greedyResult"></div>
+    </div>
+  </section>
+
+  <section class="panel-grid">
+    <div class="panel" id="warehousePanel">
+      <h3>Kho bãi và lưu trữ</h3>
+      <p>Tính nhanh phí lưu kho theo số pallet và số ngày lưu.</p>
+      <div class="form-row">
+        <input id="warehousePallets" type="number" min="1" placeholder="Số pallet">
+        <input id="warehouseDays" type="number" min="1" placeholder="Số ngày lưu kho">
+      </div>
+      <button class="btn btn-primary" type="button" onclick="calculateWarehouseFee()">Tính phí lưu kho</button>
+      <div class="result-box" id="warehouseResult"></div>
+    </div>
+
+    <div class="panel" id="customsPanel">
+      <h3>Hải quan và chứng từ</h3>
+      <p>Kiểm tra nhanh bộ hồ sơ khai báo hải quan cơ bản.</p>
+      <div class="logistics-checks">
+        <label><input type="checkbox" class="customs-doc" value="Hóa đơn thương mại"> Hóa đơn thương mại</label>
+        <label><input type="checkbox" class="customs-doc" value="Packing list"> Packing list</label>
+        <label><input type="checkbox" class="customs-doc" value="Vận đơn"> Vận đơn</label>
+        <label><input type="checkbox" class="customs-doc" value="Tờ khai hải quan"> Tờ khai hải quan</label>
+      </div>
+      <button class="btn btn-red" type="button" onclick="checkCustomsDocs()">Kiểm tra hồ sơ</button>
+      <div class="result-box" id="customsResult"></div>
     </div>
   </section>
 </main>
