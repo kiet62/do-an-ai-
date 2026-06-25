@@ -214,34 +214,57 @@ app.post('/api/chat', async (req, res) => {
     ? history.slice(-8).filter(item => item && ['user', 'assistant'].includes(item.role) && typeof item.content === 'string')
     : [];
 
-  try {
-    const response = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
+  const openAiPayload = {
+    model: OPENAI_MODEL,
+    messages: [
+      {
+        role: 'system',
+        content: 'Bạn là trợ lý chăm sóc khách hàng cho LogiPort Mart. Trả lời ngắn gọn bằng tiếng Việt, hỗ trợ tìm sản phẩm, giỏ hàng, thanh toán, tra cứu đơn hàng và dịch vụ logistics. Nếu khách hỏi thông tin ngoài phạm vi web, hãy hướng dẫn lịch sự.'
       },
-      body: JSON.stringify({
-        model: OPENAI_MODEL,
-        input: [
-          {
-            role: 'system',
-            content: 'Bạn là trợ lý chăm sóc khách hàng cho LogiPort Mart. Trả lời ngắn gọn bằng tiếng Việt, hỗ trợ tìm sản phẩm, giỏ hàng, thanh toán, tra cứu đơn hàng và dịch vụ logistics. Nếu khách hỏi thông tin ngoài phạm vi web, hãy hướng dẫn lịch sự.'
-          },
-          ...safeHistory,
-          { role: 'user', content: message }
-        ]
-      })
-    });
+      ...safeHistory,
+      { role: 'user', content: message }
+    ],
+    temperature: 0.4
+  };
 
-    const data = await response.json();
-    if (!response.ok) {
-      console.error('OpenAI API error:', data);
-      return res.status(502).json({ message: 'Chat AI đang bận. Vui lòng thử lại sau.' });
+  try {
+    let response;
+    let data;
+
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(openAiPayload)
+      });
+
+      data = await response.json();
+      const errorCode = data.error?.code || data.error?.type || '';
+      const shouldRetry = response.status >= 500 || errorCode === 'server_error';
+      if (response.ok || !shouldRetry || attempt === 3) break;
+
+      await new Promise(resolve => setTimeout(resolve, attempt * 900));
     }
 
-    const reply = data.output_text
-      || data.output?.flatMap(item => item.content || []).map(item => item.text || '').join('').trim()
+    if (!response.ok) {
+      console.error('OpenAI API error:', data);
+      const code = data.error?.code || data.error?.type || '';
+      const statusMessage = response.status === 401
+        ? 'OpenAI API key không hợp lệ. Vui lòng kiểm tra OPENAI_API_KEY trên Render.'
+        : response.status === 429
+          ? 'OpenAI API key đang hết quota hoặc bị giới hạn. Vui lòng kiểm tra billing/quota.'
+          : code.includes('model')
+            ? 'Model OpenAI chưa đúng. Hãy đặt OPENAI_MODEL là gpt-4o-mini.'
+            : code === 'server_error'
+              ? 'OpenAI đang lỗi tạm thời. Bạn thử gửi lại câu hỏi sau ít phút nhé.'
+            : 'Chat AI đang bận. Vui lòng thử lại sau.';
+      return res.status(502).json({ message: statusMessage });
+    }
+
+    const reply = data.choices?.[0]?.message?.content?.trim()
       || 'Mình chưa có câu trả lời phù hợp. Bạn vui lòng hỏi lại ngắn hơn nhé.';
 
     res.json({ reply });

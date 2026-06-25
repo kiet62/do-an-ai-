@@ -682,6 +682,14 @@ async function sendChatMessage(event) {
 
   input.value = '';
   chatMessages.push({ role: 'user', content: message });
+
+  const localReply = getLocalChatReply(message);
+  if (localReply) {
+    chatMessages.push({ role: 'assistant', content: localReply });
+    renderChatMessages();
+    return;
+  }
+
   chatMessages.push({ role: 'assistant', content: 'Đang trả lời...' });
   renderChatMessages();
 
@@ -704,6 +712,41 @@ async function sendChatMessage(event) {
   }
 
   renderChatMessages();
+}
+
+function getLocalChatReply(message) {
+  const normalized = message.toLowerCase();
+  if (normalized.includes('giỏ') || normalized.includes('gio')) {
+    if (!cartItems.length) {
+      return 'Giỏ hàng của bạn hiện đang trống. Bạn có thể bấm "Thêm vào giỏ" ở sản phẩm muốn mua.';
+    }
+    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const list = cartItems.map(item => `- ${item.name} × ${item.quantity}: ${formatVND(item.price * item.quantity)}`).join('\n');
+    return `Trong giỏ hàng của bạn có:\n${list}\nTổng tạm tính: ${formatVND(total)}.`;
+  }
+
+  if (normalized.includes('lịch sử') || normalized.includes('lich su') || normalized.includes('đã đặt') || normalized.includes('da dat')) {
+    const orders = getSavedOrders().slice(-5).reverse();
+    if (!orders.length) {
+      return 'Bạn chưa có đơn hàng nào trong lịch sử đặt hàng trên trình duyệt này.';
+    }
+    return 'Các đơn gần đây của bạn:\n' + orders.map(order => `- ${order.code}: ${order.status}, ${formatVND(order.total || 0)}`).join('\n');
+  }
+
+  const orderCodeMatch = message.match(/LG\d{6,}-?\d*/i);
+  if (orderCodeMatch || normalized.includes('tra cứu') || normalized.includes('tra cuu')) {
+    const code = orderCodeMatch?.[0];
+    if (!code) {
+      return 'Bạn nhập mã đơn vào ô "Tra cứu đơn hàng nhanh" hoặc gửi mã đơn dạng LG20260620-001 để mình kiểm tra.';
+    }
+    const order = getOrderByCode(code);
+    if (!order) {
+      return `Mình chưa tìm thấy đơn ${code}. Bạn kiểm tra lại mã đơn giúp mình nhé.`;
+    }
+    return `Đơn ${order.code}: ${order.status}. Người nhận: ${order.customer}. Tuyến đường: ${order.route}. ETA: ${order.eta}.`;
+  }
+
+  return '';
 }
 
 window.addEventListener('DOMContentLoaded', () => {
