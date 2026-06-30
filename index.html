@@ -13,7 +13,19 @@
 <header class="header">
   <div class="header-inner">
     <div class="logo">LOGIPORT<span>MART.COM</span></div>
-    <button class="menu-btn">☰ Danh mục</button>
+    <button class="menu-btn" type="button" onclick="toggleCategoryMenu()">☰ Danh mục</button>
+    <div class="category-menu" id="categoryMenu" aria-hidden="true">
+      <button type="button" onclick="goToCategory('electronics')"><span>💻</span>Điện tử, laptop</button>
+      <button type="button" onclick="goToCategory('electronics')"><span>⌨️</span>Bàn phím, chuột</button>
+      <button type="button" onclick="goToCategory('fashion')"><span>👕</span>Quần áo, giày dép</button>
+      <button type="button" onclick="goToCategory('fashion')"><span>🎒</span>Túi, balo, phụ kiện</button>
+      <button type="button" onclick="goToCategory('model')"><span>🚢</span>Mô hình tàu, xe</button>
+      <button type="button" onclick="goToCategory('home-goods')"><span>🏠</span>Gia dụng</button>
+      <button type="button" onclick="goToCategory('home-goods')"><span>🪑</span>Hàng cồng kềnh</button>
+      <button type="button" onclick="goToCategory('packing')"><span>📦</span>Thùng, pallet</button>
+      <button type="button" onclick="goToCategory('packing')"><span>🏷️</span>Tem nhãn, đóng gói</button>
+      <a href="logistics.html"><span>🚚</span>Dịch vụ logistics</a>
+    </div>
     <div class="search">
       <input id="searchInput" type="text" placeholder="Bạn cần tìm gì? Ví dụ: bàn phím, quần áo, mô hình tàu, pallet...">
       <button onclick="searchProduct()">🔍</button>

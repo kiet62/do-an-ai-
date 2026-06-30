@@ -437,6 +437,7 @@ function updateUserInfoPanel() {
 
 function toggleHeaderPanel(panelId) {
   closeUserInfo();
+  closeCategoryMenu();
   const panel = document.getElementById(panelId);
   if (!panel) return;
   const shouldOpen = !panel.classList.contains('open');
@@ -458,11 +459,36 @@ function closeHeaderPanels() {
   });
 }
 
+function toggleCategoryMenu() {
+  closeUserInfo();
+  closeHeaderPanels();
+  const menu = document.getElementById('categoryMenu');
+  if (!menu) return;
+  const isOpen = menu.classList.toggle('open');
+  menu.setAttribute('aria-hidden', String(!isOpen));
+}
+
+function closeCategoryMenu() {
+  const menu = document.getElementById('categoryMenu');
+  if (!menu) return;
+  menu.classList.remove('open');
+  menu.setAttribute('aria-hidden', 'true');
+}
+
+function goToCategory(categoryId) {
+  const section = document.getElementById(categoryId);
+  closeCategoryMenu();
+  if (!section) return;
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 document.addEventListener('click', event => {
   const popover = document.getElementById('userInfoPopover');
   const authAction = document.getElementById('authAction');
   const clickedHeaderPanel = event.target.closest?.('.header-popover');
   const clickedHeaderButton = event.target.closest?.('.header-action-button');
+  const clickedCategoryMenu = event.target.closest?.('#categoryMenu');
+  const clickedCategoryButton = event.target.closest?.('.menu-btn');
 
   if (popover && authAction && popover.classList.contains('open') && !popover.contains(event.target) && !authAction.contains(event.target)) {
     closeUserInfo();
@@ -470,6 +496,10 @@ document.addEventListener('click', event => {
 
   if (!clickedHeaderPanel && !clickedHeaderButton) {
     closeHeaderPanels();
+  }
+
+  if (!clickedCategoryMenu && !clickedCategoryButton) {
+    closeCategoryMenu();
   }
 });
 
