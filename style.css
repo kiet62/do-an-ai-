@@ -160,6 +160,11 @@ button:disabled,select:disabled{opacity:.55;cursor:not-allowed}
 .logistics-checks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
 .logistics-checks label{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;color:#334155}
 .logistics-checks input{width:auto}
+.logistics-menu{left:150px}
+.transport-history{padding:16px;display:grid;gap:10px}
+.transport-history-item{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid #e2e8f0;border-radius:8px;padding:13px;background:white}
+.transport-history-item p{margin:6px 0;color:#334155}
+.transport-history-item small{color:#64748b}
 .route-line{position:absolute;left:55px;top:145px;width:78%;height:8px;background:#334155;border-radius:999px;transform:rotate(-7deg)}
 .point{position:absolute;width:34px;height:34px;border-radius:50%;color:white;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:2}
 .a{left:44px;top:136px;background:#2563eb}.b{left:165px;top:88px;background:#22c55e}.c{left:315px;top:168px;background:#f97316}.d{right:48px;top:110px;background:#ef4444}
@@ -213,5 +218,5 @@ th{background:#f8fafc;color:#111827}
 .guard-card button{width:100%;padding:12px;border-radius:10px;border:none;cursor:pointer;font-weight:bold}
 footer{background:#111827;color:white;text-align:center;padding:28px 16px;margin-top:30px}
 @media(max-width:1180px){.hero-layout{grid-template-columns:1fr}.right-ad{display:none}.product-grid{grid-template-columns:repeat(3,1fr)}.promo-row{grid-template-columns:repeat(2,1fr)}.role-grid{grid-template-columns:repeat(3,1fr)}.dashboard-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:820px){.header-inner{flex-wrap:wrap}.category-menu{left:18px;width:min(320px,calc(100vw - 36px))}.search{order:3;flex-basis:100%}.header-action:nth-child(4){display:none}.order-lookup-popover{right:18px;width:calc(100vw - 36px)}.order-lookup-popover::before{right:210px}.cart-popover::before{right:120px}.banner-grid{grid-template-columns:1fr}.big-banner{grid-row:auto}.promo-row{grid-template-columns:1fr}.product-grid{grid-template-columns:repeat(2,1fr)}.panel-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.role-grid{grid-template-columns:repeat(2,1fr)}.admin-user-form{grid-template-columns:1fr}.admin-row-actions{justify-content:flex-start}}
+@media(max-width:820px){.header-inner{flex-wrap:wrap}.category-menu{left:18px;width:min(320px,calc(100vw - 36px))}.search{order:3;flex-basis:100%}.header-action:nth-child(4){display:none}.order-lookup-popover{right:18px;width:calc(100vw - 36px)}.order-lookup-popover::before{right:210px}.cart-popover::before{right:120px}.banner-grid{grid-template-columns:1fr}.big-banner{grid-row:auto}.promo-row{grid-template-columns:1fr}.product-grid{grid-template-columns:repeat(2,1fr)}.panel-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.role-grid{grid-template-columns:repeat(2,1fr)}.admin-user-form{grid-template-columns:1fr}.admin-row-actions{justify-content:flex-start}.transport-history-item{align-items:flex-start;flex-direction:column}}
 @media(max-width:520px){.product-grid,.role-grid,.dashboard-grid{grid-template-columns:1fr}.sub-nav-inner{justify-content:flex-start}.big-banner h1{font-size:25px}.ai-chat-widget{right:14px;bottom:76px}.ai-chat-panel{height:430px}}

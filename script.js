@@ -513,6 +513,7 @@ document.addEventListener('click', event => {
   const clickedHeaderPanel = event.target.closest?.('.header-popover');
   const clickedHeaderButton = event.target.closest?.('.header-action-button');
   const clickedCategoryMenu = event.target.closest?.('#categoryMenu');
+  const clickedLogisticsMenu = event.target.closest?.('#logisticsMenu');
   const clickedCategoryButton = event.target.closest?.('.menu-btn');
 
   if (popover && authAction && popover.classList.contains('open') && !popover.contains(event.target) && !authAction.contains(event.target)) {
@@ -525,6 +526,10 @@ document.addEventListener('click', event => {
 
   if (!clickedCategoryMenu && !clickedCategoryButton) {
     closeCategoryMenu();
+  }
+
+  if (!clickedLogisticsMenu && !clickedCategoryButton) {
+    closeLogisticsMenu();
   }
 });
 
@@ -726,6 +731,27 @@ function scrollToLogisticsPanel(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+const TRANSPORT_REQUESTS_KEY = 'logiport_transport_requests';
+
+function toggleLogisticsMenu() {
+  const menu = document.getElementById('logisticsMenu');
+  if (!menu) return;
+  const isOpen = menu.classList.toggle('open');
+  menu.setAttribute('aria-hidden', String(!isOpen));
+}
+
+function closeLogisticsMenu() {
+  const menu = document.getElementById('logisticsMenu');
+  if (!menu) return;
+  menu.classList.remove('open');
+  menu.setAttribute('aria-hidden', 'true');
+}
+
+function goToLogisticsPanel(id) {
+  closeLogisticsMenu();
+  scrollToLogisticsPanel(id);
+}
+
 function updateGoogleMap() {
   const origin = document.getElementById('mapOrigin')?.value.trim() || 'Cảng Cát Lái, TP Hồ Chí Minh';
   const destination = document.getElementById('mapDestination')?.value.trim() || 'Thủ Đức, TP Hồ Chí Minh';
@@ -744,6 +770,7 @@ function initLogisticsPage() {
   if (document.getElementById('googleMapFrame')) {
     updateGoogleMap();
   }
+  renderTransportRequests();
 }
 
 function submitTransportRequest() {
@@ -766,6 +793,7 @@ function submitTransportRequest() {
   const weightFee = Math.ceil(weight / 100) * 25000;
   const quote = baseFee + weightFee;
   const requestCode = `VC${Date.now().toString().slice(-6)}`;
+  const createdAt = new Date().toLocaleString('vi-VN');
 
   const mapOrigin = document.getElementById('mapOrigin');
   const mapDestination = document.getElementById('mapDestination');
@@ -779,7 +807,114 @@ function submitTransportRequest() {
     `<strong>Phương tiện:</strong> ${escapeHtml(vehicle)}<br>` +
     `<strong>Khối lượng:</strong> ${weight.toLocaleString('vi-VN')} kg<br>` +
     `<strong>Báo giá tạm tính:</strong> ${formatVND(quote)}<br>` +
-    `<strong>Ghi chú:</strong> ${escapeHtml(note || 'Không có')}`;
+    `<strong>Ghi chú:</strong> ${escapeHtml(note || 'Không có')}<br>` +
+    `<button class="btn btn-secondary" type="button" onclick="copyText('${requestCode}')">Copy mã yêu cầu</button>`;
+
+  saveTransportRequest({ requestCode, pickup, delivery, vehicle, weight, note, quote, createdAt, status: 'Chờ điều phối' });
+  renderTransportRequests();
+}
+
+function getTransportRequests() {
+  try {
+    return JSON.parse(localStorage.getItem(TRANSPORT_REQUESTS_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveTransportRequest(request) {
+  const requests = getTransportRequests();
+  requests.push(request);
+  localStorage.setItem(TRANSPORT_REQUESTS_KEY, JSON.stringify(requests.slice(-20)));
+}
+
+function renderTransportRequests() {
+  const container = document.getElementById('transportHistory');
+  if (!container) return;
+  const query = document.getElementById('logisticsSearchInput')?.value.trim().toLowerCase() || '';
+  const requests = getTransportRequests()
+    .slice()
+    .reverse()
+    .filter(item => !query || Object.values(item).some(value => String(value ?? '').toLowerCase().includes(query)));
+
+  if (!requests.length) {
+    container.innerHTML = '<p>Chưa có yêu cầu vận chuyển nào.</p>';
+    return;
+  }
+
+  container.innerHTML = requests.map(item => `
+    <div class="transport-history-item">
+      <div>
+        <strong>${escapeHtml(item.requestCode)}</strong>
+        <span class="status pending">${escapeHtml(item.status || 'Chờ điều phối')}</span>
+        <p>${escapeHtml(item.pickup)} → ${escapeHtml(item.delivery)}</p>
+        <small>${escapeHtml(item.vehicle)} · ${Number(item.weight || 0).toLocaleString('vi-VN')} kg · ${formatVND(item.quote || 0)} · ${escapeHtml(item.createdAt || '')}</small>
+      </div>
+      <div class="admin-row-actions">
+        <button class="btn btn-secondary" type="button" onclick="reuseTransportRequest('${escapeHtml(item.requestCode)}')">Dùng lại</button>
+        <button class="btn btn-primary" type="button" onclick="copyText('${escapeHtml(item.requestCode)}')">Copy mã</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function reuseTransportRequest(requestCode) {
+  const request = getTransportRequests().find(item => item.requestCode === requestCode);
+  if (!request) return;
+  const pickup = document.getElementById('pickupPoint');
+  const delivery = document.getElementById('deliveryPoint');
+  const vehicle = document.getElementById('vehicleType');
+  const weight = document.getElementById('cargoWeight');
+  const note = document.getElementById('cargoNote');
+  if (pickup) pickup.value = request.pickup || '';
+  if (delivery) delivery.value = request.delivery || '';
+  if (vehicle) vehicle.value = request.vehicle || 'Xe tải nhỏ';
+  if (weight) weight.value = request.weight || '';
+  if (note) note.value = request.note || '';
+  goToLogisticsPanel('transportForm');
+}
+
+function clearTransportRequests() {
+  if (!confirm('Xóa toàn bộ lịch sử yêu cầu vận chuyển?')) return;
+  localStorage.removeItem(TRANSPORT_REQUESTS_KEY);
+  renderTransportRequests();
+}
+
+function resetTransportForm() {
+  const fields = ['pickupPoint', 'deliveryPoint', 'cargoWeight', 'cargoNote'];
+  fields.forEach(id => {
+    const field = document.getElementById(id);
+    if (field) field.value = '';
+  });
+  const vehicle = document.getElementById('vehicleType');
+  if (vehicle) vehicle.selectedIndex = 0;
+  const result = document.getElementById('transportResult');
+  if (result) {
+    result.style.display = 'none';
+    result.innerHTML = '';
+  }
+}
+
+function fillSampleTrackingCode() {
+  const input = document.getElementById('trackingCode');
+  if (input) input.value = 'LG20260620-001';
+  trackOrder();
+}
+
+function filterLogisticsPanels() {
+  const query = document.getElementById('logisticsSearchInput')?.value.trim().toLowerCase() || '';
+  renderTransportRequests();
+  document.querySelectorAll('.panel, #transportHistoryPanel').forEach(panel => {
+    panel.style.display = !query || panel.innerText.toLowerCase().includes(query) ? '' : 'none';
+  });
+}
+
+function copyText(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => alert(`Đã copy: ${text}`)).catch(() => alert(text));
+  } else {
+    alert(text);
+  }
 }
 
 function calculateWarehouseFee() {

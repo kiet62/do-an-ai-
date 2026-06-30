@@ -12,13 +12,22 @@
 <header class="header">
   <div class="header-inner">
     <div class="logo">LOGIPORT<span>MART.COM</span></div>
-    <button class="menu-btn">☰ Dịch vụ</button>
+    <button class="menu-btn" type="button" onclick="toggleLogisticsMenu()">☰ Dịch vụ</button>
+    <div class="category-menu logistics-menu" id="logisticsMenu" aria-hidden="true">
+      <button type="button" onclick="goToLogisticsPanel('tracking')"><span>📦</span>Tra cứu đơn</button>
+      <button type="button" onclick="goToLogisticsPanel('map')"><span>🗺️</span>Bản đồ giao hàng</button>
+      <button type="button" onclick="goToLogisticsPanel('transportForm')"><span>🚚</span>Đặt vận chuyển</button>
+      <button type="button" onclick="goToLogisticsPanel('greedyPanel')"><span>🧭</span>Tối ưu tuyến</button>
+      <button type="button" onclick="goToLogisticsPanel('warehousePanel')"><span>🏬</span>Tính phí lưu kho</button>
+      <button type="button" onclick="goToLogisticsPanel('customsPanel')"><span>🧾</span>Kiểm tra hải quan</button>
+      <button type="button" onclick="goToLogisticsPanel('transportHistoryPanel')"><span>📋</span>Lịch sử yêu cầu</button>
+    </div>
     <div class="search">
-      <input type="text" placeholder="Tìm dịch vụ vận chuyển, kho bãi, hải quan, mã đơn...">
-      <button>🔍</button>
+      <input id="logisticsSearchInput" type="text" placeholder="Tìm dịch vụ vận chuyển, kho bãi, hải quan, mã đơn..." oninput="filterLogisticsPanels()">
+      <button type="button" onclick="filterLogisticsPanels()">🔍</button>
     </div>
     <div class="header-action"><span class="icon">☎</span><div>Hotline<br>1900.5301</div></div>
-    <div class="header-action"><span class="icon">📦</span><div>Tra cứu<br>đơn hàng</div></div>
+    <button class="header-action header-action-button" type="button" onclick="goToLogisticsPanel('tracking')"><span class="icon">📦</span><div>Tra cứu<br>đơn hàng</div></button>
     <a class="header-action auth-action" id="authAction" href="auth.html"><span class="icon">👤</span><div id="authActionText">Đăng<br>nhập</div></a>
     <button id="logoutButtonHeader" class="btn btn-secondary logout-button" type="button" onclick="clearAuth()" style="display:none; margin-left:12px;">Đăng xuất</button>
   </div>
@@ -47,6 +56,7 @@
         </select>
       </div>
       <button class="btn btn-primary" onclick="trackOrder()">Theo dõi đơn hàng</button>
+      <button class="btn btn-secondary" type="button" onclick="fillSampleTrackingCode()">Dùng mã mẫu</button>
       <div class="result-box" id="trackingResult"></div>
     </div>
 
@@ -80,6 +90,7 @@
       <textarea id="cargoNote" rows="4" placeholder="Ghi chú hàng hóa"></textarea>
       <br><br>
       <button class="btn btn-red" type="button" onclick="submitTransportRequest()">Gửi yêu cầu vận chuyển</button>
+      <button class="btn btn-secondary" type="button" onclick="resetTransportForm()">Làm mới</button>
       <div class="result-box" id="transportResult"></div>
     </div>
 
@@ -93,6 +104,42 @@ Bình Dương</textarea>
       <br><br>
       <button class="btn btn-primary" onclick="runGreedy()">Chạy Greedy demo</button>
       <div class="result-box" id="greedyResult"></div>
+    </div>
+  </section>
+
+  <section class="panel-grid">
+    <div class="panel" id="warehousePanel">
+      <h3>Tính phí lưu kho</h3>
+      <p>Ước tính chi phí lưu kho theo số pallet và số ngày lưu trữ.</p>
+      <div class="form-row">
+        <input id="warehousePallets" type="number" min="1" placeholder="Số pallet">
+        <input id="warehouseDays" type="number" min="1" placeholder="Số ngày lưu kho">
+      </div>
+      <button class="btn btn-primary" type="button" onclick="calculateWarehouseFee()">Tính phí lưu kho</button>
+      <div class="result-box" id="warehouseResult"></div>
+    </div>
+
+    <div class="panel" id="customsPanel">
+      <h3>Kiểm tra hồ sơ hải quan</h3>
+      <p>Đánh dấu các chứng từ đã có để kiểm tra nhanh hồ sơ cơ bản.</p>
+      <div class="logistics-checks">
+        <label><input class="customs-doc" type="checkbox" value="Hóa đơn thương mại"> Hóa đơn thương mại</label>
+        <label><input class="customs-doc" type="checkbox" value="Packing list"> Packing list</label>
+        <label><input class="customs-doc" type="checkbox" value="Vận đơn"> Vận đơn</label>
+        <label><input class="customs-doc" type="checkbox" value="Tờ khai hải quan"> Tờ khai hải quan</label>
+      </div>
+      <button class="btn btn-primary" type="button" onclick="checkCustomsDocs()">Kiểm tra hồ sơ</button>
+      <div class="result-box" id="customsResult"></div>
+    </div>
+  </section>
+
+  <section class="section" id="transportHistoryPanel">
+    <div class="section-head">
+      <h2>Lịch sử yêu cầu vận chuyển</h2>
+      <a href="#" onclick="clearTransportRequests(); return false;">Xóa lịch sử</a>
+    </div>
+    <div class="transport-history" id="transportHistory">
+      <p>Chưa có yêu cầu vận chuyển nào.</p>
     </div>
   </section>
 
