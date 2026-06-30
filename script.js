@@ -482,6 +482,30 @@ function goToCategory(categoryId) {
   section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function initCategoryProductToggles() {
+  document.querySelectorAll('.view-all-link').forEach(link => {
+    const section = link.closest('.section');
+    const cards = Array.from(section?.querySelectorAll('.product-grid > .product-card') || []);
+    cards.forEach((card, index) => {
+      card.classList.toggle('is-extra-product', index >= 5);
+    });
+    section?.classList.remove('show-all-products');
+    link.textContent = cards.length > 5 ? 'Xem tất cả >' : '';
+    link.style.display = cards.length > 5 ? 'inline-flex' : 'none';
+  });
+}
+
+function toggleCategoryProducts(sectionId, linkElement) {
+  const section = document.getElementById(sectionId);
+  if (!section) return;
+  const isExpanded = section.classList.toggle('show-all-products');
+  const link = linkElement || section.querySelector('.view-all-link');
+  if (link) link.textContent = isExpanded ? 'Thu gọn ˄' : 'Xem tất cả >';
+  if (!isExpanded) {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
 document.addEventListener('click', event => {
   const popover = document.getElementById('userInfoPopover');
   const authAction = document.getElementById('authAction');
@@ -1239,6 +1263,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initCart();
   loadPublicProducts();
+  initCategoryProductToggles();
   initAdminData();
   initLogisticsPage();
   initChatBox();
