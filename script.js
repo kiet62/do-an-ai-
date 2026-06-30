@@ -378,6 +378,7 @@ function clearAuth() {
   currentUser = null;
   localStorage.removeItem('logiport_token');
   localStorage.removeItem('logiport_user');
+  clearChatHistory();
   closeUserInfo();
   updateAuthUI();
   updateCartCount();
@@ -882,17 +883,157 @@ async function loadUserList() {
     }
 
     if (!data.users || !data.users.length) {
+      adminUsersCache = [];
+      updateAdminStats();
       userListContainer.innerHTML = '<p>Không có tài khoản nào trong hệ thống.</p>';
       return;
     }
 
-    userListContainer.innerHTML = data.users.map(user => 
-      `<div class="user-row"><div><strong>${user.displayName}</strong><br><span>${user.username}</span></div><span>${user.role}</span></div>`
-    ).join('');
+    adminUsersCache = data.users;
+    renderAdminUsers();
+    updateAdminStats();
   } catch (err) {
     console.error(err);
     userListContainer.innerHTML = '<p>Lỗi kết nối. Vui lòng thử lại.</p>';
   }
+}
+
+function renderAdminUsers() {
+  const userListContainer = document.getElementById('userListContainer');
+  if (!userListContainer) return;
+  const query = getAdminSearchQuery();
+  const users = adminUsersCache.filter(user => adminMatches(user, query));
+  if (!users.length) {
+    userListContainer.innerHTML = '<p>Không có tài khoản phù hợp.</p>';
+    return;
+  }
+  userListContainer.innerHTML = users.map(user => `
+    <div class="user-row">
+      <div>
+        <strong>${escapeHtml(user.displayName)}</strong><br>
+        <span>${escapeHtml(user.username)}</span>
+      </div>
+      <div class="admin-row-actions">
+        <select onchange="updateAdminUserRole('${escapeHtml(user.id)}', this.value)" ${user.id === currentUser?.id ? 'disabled' : ''}>
+          <option value="customer" ${user.role === 'customer' ? 'selected' : ''}>Khách hàng</option>
+          <option value="staff" ${user.role === 'staff' ? 'selected' : ''}>Nhân viên</option>
+          <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+        </select>
+        <button class="btn btn-red" type="button" onclick="deleteAdminUser('${escapeHtml(user.id)}')" ${user.id === currentUser?.id ? 'disabled' : ''}>Xóa</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function createAdminUser() {
+  const displayName = document.getElementById('adminUserDisplayName')?.value.trim();
+  const username = document.getElementById('adminUsername')?.value.trim();
+  const password = document.getElementById('adminUserPassword')?.value.trim();
+  const role = document.getElementById('adminUserRole')?.value;
+
+  if (!authToken || !currentUser || currentUser.role !== 'admin') {
+    showAdminFeedback('adminUserResult', 'Bạn cần đăng nhập Admin để tạo tài khoản.', true);
+    return;
+  }
+  if (!displayName || !username || !password) {
+    showAdminFeedback('adminUserResult', 'Vui lòng nhập họ tên, username và mật khẩu.', true);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`
+      },
+      body: JSON.stringify({ displayName, username, password, role })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      showAdminFeedback('adminUserResult', data.message || 'Không thể tạo tài khoản.', true);
+      return;
+    }
+    document.getElementById('adminUserDisplayName').value = '';
+    document.getElementById('adminUsername').value = '';
+    document.getElementById('adminUserPassword').value = '';
+    showAdminFeedback('adminUserResult', data.message || 'Đã tạo tài khoản.');
+    loadUserList();
+  } catch (err) {
+    console.error(err);
+    showAdminFeedback('adminUserResult', 'Lỗi kết nối server. Vui lòng thử lại.', true);
+  }
+}
+
+async function updateAdminUserRole(userId, role) {
+  try {
+    const response = await fetch(`${API_BASE}/users/${encodeURIComponent(userId)}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`
+      },
+      body: JSON.stringify({ role })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      showAdminFeedback('adminUserResult', data.message || 'Không thể cập nhật tài khoản.', true);
+      loadUserList();
+      return;
+    }
+    showAdminFeedback('adminUserResult', data.message || 'Đã cập nhật tài khoản.');
+    loadUserList();
+  } catch (err) {
+    console.error(err);
+    showAdminFeedback('adminUserResult', 'Lỗi kết nối server. Vui lòng thử lại.', true);
+    loadUserList();
+  }
+}
+
+async function deleteAdminUser(userId) {
+  if (!confirm('Xóa tài khoản này khỏi hệ thống?')) return;
+  try {
+    const response = await fetch(`${API_BASE}/users/${encodeURIComponent(userId)}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${authToken}` }
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      showAdminFeedback('adminUserResult', data.message || 'Không thể xóa tài khoản.', true);
+      return;
+    }
+    showAdminFeedback('adminUserResult', data.message || 'Đã xóa tài khoản.');
+    loadUserList();
+  } catch (err) {
+    console.error(err);
+    showAdminFeedback('adminUserResult', 'Lỗi kết nối server. Vui lòng thử lại.', true);
+  }
+}
+
+function getAdminSearchQuery() {
+  return document.getElementById('adminSearchInput')?.value.trim().toLowerCase() || '';
+}
+
+function adminMatches(item, query) {
+  if (!query) return true;
+  return Object.values(item || {}).some(value => String(value ?? '').toLowerCase().includes(query));
+}
+
+function filterAdminData() {
+  renderAdminProducts();
+  renderAdminOrders();
+  renderAdminUsers();
+}
+
+function updateAdminStats() {
+  const totalOrders = document.getElementById('adminTotalOrders');
+  const shippingOrders = document.getElementById('adminShippingOrders');
+  const totalProducts = document.getElementById('adminTotalProducts');
+  const totalUsers = document.getElementById('adminTotalUsers');
+  if (totalOrders) totalOrders.textContent = String(adminOrdersCache.length);
+  if (shippingOrders) shippingOrders.textContent = String(adminOrdersCache.filter(order => getStatusClass(order.status) === 'ship').length);
+  if (totalProducts) totalProducts.textContent = String(adminProductsCache.length);
+  if (totalUsers) totalUsers.textContent = String(adminUsersCache.length);
 }
 
 async function loadPublicProducts() {
@@ -947,7 +1088,12 @@ function showAdminFeedback(elementId, message, isError = false) {
   result.innerHTML = escapeHtml(message);
 }
 
+let adminProductsCache = [];
+let adminOrdersCache = [];
+let adminUsersCache = [];
+
 async function createAdminProduct() {
+  const productId = document.getElementById('adminProductId')?.value;
   const name = document.getElementById('adminProductName')?.value.trim();
   const price = document.getElementById('adminProductPrice')?.value;
   const category = document.getElementById('adminProductCategory')?.value;
@@ -963,8 +1109,8 @@ async function createAdminProduct() {
   }
 
   try {
-    const response = await fetch(`${API_BASE}/products`, {
-      method: 'POST',
+    const response = await fetch(productId ? `${API_BASE}/products/${encodeURIComponent(productId)}` : `${API_BASE}/products`, {
+      method: productId ? 'PUT' : 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authToken}`
@@ -977,11 +1123,56 @@ async function createAdminProduct() {
       return;
     }
 
-    document.getElementById('adminProductName').value = '';
-    document.getElementById('adminProductPrice').value = '';
-    document.getElementById('adminProductDescription').value = '';
+    resetAdminProductForm();
     showAdminFeedback('adminProductResult', data.message || 'Sản phẩm đã được lưu.');
     loadAdminProducts();
+    loadPublicProducts();
+  } catch (err) {
+    console.error(err);
+    showAdminFeedback('adminProductResult', 'Lỗi kết nối server. Vui lòng thử lại.', true);
+  }
+}
+
+function resetAdminProductForm() {
+  const productId = document.getElementById('adminProductId');
+  const name = document.getElementById('adminProductName');
+  const price = document.getElementById('adminProductPrice');
+  const description = document.getElementById('adminProductDescription');
+  const saveButton = document.getElementById('adminProductSaveButton');
+  if (productId) productId.value = '';
+  if (name) name.value = '';
+  if (price) price.value = '';
+  if (description) description.value = '';
+  if (saveButton) saveButton.textContent = 'Lưu sản phẩm';
+}
+
+function editAdminProduct(productId) {
+  const product = adminProductsCache.find(item => item.id === productId);
+  if (!product) return;
+  document.getElementById('adminProductId').value = product.id;
+  document.getElementById('adminProductName').value = product.name || '';
+  document.getElementById('adminProductPrice').value = product.price || '';
+  document.getElementById('adminProductCategory').value = product.category || 'Điện tử';
+  document.getElementById('adminProductDescription').value = product.description || '';
+  document.getElementById('adminProductSaveButton').textContent = 'Cập nhật sản phẩm';
+  document.getElementById('adminProductName')?.focus();
+}
+
+async function deleteAdminProduct(productId) {
+  if (!confirm('Xóa sản phẩm này khỏi hệ thống?')) return;
+  try {
+    const response = await fetch(`${API_BASE}/products/${encodeURIComponent(productId)}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${authToken}` }
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      showAdminFeedback('adminProductResult', data.message || 'Không thể xóa sản phẩm.', true);
+      return;
+    }
+    showAdminFeedback('adminProductResult', data.message || 'Đã xóa sản phẩm.');
+    loadAdminProducts();
+    loadPublicProducts();
   } catch (err) {
     console.error(err);
     showAdminFeedback('adminProductResult', 'Lỗi kết nối server. Vui lòng thử lại.', true);
@@ -1006,19 +1197,39 @@ async function loadAdminProducts() {
       return;
     }
     if (!data.products?.length) {
+      adminProductsCache = [];
+      updateAdminStats();
       list.innerHTML = '<p>Chưa có sản phẩm nào được thêm từ Admin.</p>';
       return;
     }
-    list.innerHTML = data.products.map(product => `
-      <div class="admin-list-row">
-        <div><strong>${escapeHtml(product.name)}</strong><br><span>${escapeHtml(product.category || 'Khác')}</span></div>
-        <strong>${formatVND(product.price)}</strong>
-      </div>
-    `).join('');
+    adminProductsCache = data.products;
+    renderAdminProducts();
+    updateAdminStats();
   } catch (err) {
     console.error(err);
     list.innerHTML = '<p>Lỗi kết nối server. Vui lòng thử lại.</p>';
   }
+}
+
+function renderAdminProducts() {
+  const list = document.getElementById('adminProductList');
+  if (!list) return;
+  const query = getAdminSearchQuery();
+  const products = adminProductsCache.filter(product => adminMatches(product, query));
+  if (!products.length) {
+    list.innerHTML = '<p>Không có sản phẩm phù hợp.</p>';
+    return;
+  }
+  list.innerHTML = products.map(product => `
+      <div class="admin-list-row">
+        <div><strong>${escapeHtml(product.name)}</strong><br><span>${escapeHtml(product.category || 'Khác')}</span></div>
+        <div class="admin-row-actions">
+          <strong>${formatVND(product.price)}</strong>
+          <button class="btn btn-secondary" type="button" onclick="editAdminProduct('${escapeHtml(product.id)}')">Sửa</button>
+          <button class="btn btn-red" type="button" onclick="deleteAdminProduct('${escapeHtml(product.id)}')">Xóa</button>
+        </div>
+      </div>
+    `).join('');
 }
 
 async function loadAdminOrders() {
@@ -1032,22 +1243,46 @@ async function loadAdminOrders() {
     });
     const data = await response.json();
     if (!response.ok) {
-      tableBody.innerHTML = `<tr><td colspan="5">${escapeHtml(data.message || 'Không tải được đơn hàng.')}</td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="6">${escapeHtml(data.message || 'Không tải được đơn hàng.')}</td></tr>`;
       return;
     }
-    tableBody.innerHTML = data.orders.map(order => `
+    adminOrdersCache = data.orders || [];
+    renderAdminOrders();
+    updateAdminStats();
+  } catch (err) {
+    console.error(err);
+    tableBody.innerHTML = '<tr><td colspan="6">Lỗi kết nối server. Vui lòng thử lại.</td></tr>';
+  }
+}
+
+function renderAdminOrders() {
+  const tableBody = document.getElementById('adminOrderTableBody');
+  if (!tableBody) return;
+  const query = getAdminSearchQuery();
+  const orders = adminOrdersCache.filter(order => adminMatches(order, query));
+  if (!orders.length) {
+    tableBody.innerHTML = '<tr><td colspan="6">Không có đơn hàng phù hợp.</td></tr>';
+    return;
+  }
+  tableBody.innerHTML = orders.map(order => `
       <tr>
         <td>${escapeHtml(order.orderId)}</td>
         <td>${escapeHtml(order.customer || 'Khách hàng')}</td>
         <td>${escapeHtml(order.department || 'Điều phối')}</td>
         <td><span class="status ${getStatusClass(order.status)}">${escapeHtml(order.status)}</span></td>
         <td>${escapeHtml(order.driver || 'Chưa phân')}</td>
+        <td><button class="btn btn-secondary" type="button" onclick="selectOrderForAssignment('${escapeHtml(order.orderId)}')">Chọn</button></td>
       </tr>
     `).join('');
-  } catch (err) {
-    console.error(err);
-    tableBody.innerHTML = '<tr><td colspan="5">Lỗi kết nối server. Vui lòng thử lại.</td></tr>';
-  }
+}
+
+function selectOrderForAssignment(orderId) {
+  const order = adminOrdersCache.find(item => item.orderId === orderId);
+  const input = document.getElementById('assignOrderId');
+  const route = document.getElementById('assignRoute');
+  if (input) input.value = orderId;
+  if (route && order?.route) route.value = order.route;
+  document.getElementById('assignDriver')?.focus();
 }
 
 function getStatusClass(status = '') {
@@ -1114,10 +1349,16 @@ function initAdminData() {
   if (!document.getElementById('adminProductList') && !document.getElementById('adminOrderTableBody')) return;
   loadAdminProducts();
   loadAdminOrders();
+  loadUserList();
+  updateAdminStats();
 }
 
 const CHAT_HISTORY_KEY = 'logiport_chat_history';
 let chatMessages = [];
+const DEFAULT_CHAT_MESSAGE = {
+  role: 'assistant',
+  content: 'Xin chào! Mình có thể hỗ trợ tìm sản phẩm, kiểm tra giỏ hàng, tra cứu mã đơn hoặc tư vấn dịch vụ logistics.'
+};
 
 function initChatBox() {
   if (document.getElementById('aiChatWidget')) return;
@@ -1151,12 +1392,16 @@ function initChatBox() {
   document.body.appendChild(widget);
 
   if (!chatMessages.length) {
-    chatMessages = [{
-      role: 'assistant',
-      content: 'Xin chào! Mình có thể hỗ trợ tìm sản phẩm, kiểm tra giỏ hàng, tra cứu mã đơn hoặc tư vấn dịch vụ logistics.'
-    }];
+    chatMessages = [{ ...DEFAULT_CHAT_MESSAGE }];
   }
   renderChatMessages();
+}
+
+function clearChatHistory() {
+  localStorage.removeItem(CHAT_HISTORY_KEY);
+  chatMessages = [{ ...DEFAULT_CHAT_MESSAGE }];
+  renderChatMessages();
+  document.getElementById('aiChatPanel')?.classList.remove('open');
 }
 
 function toggleChatBox(forceOpen) {

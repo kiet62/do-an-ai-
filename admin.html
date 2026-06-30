@@ -14,7 +14,7 @@
     <div class="logo">LOGIPORT<span>ADMIN</span></div>
     <button class="menu-btn">☰ Dashboard</button>
     <div class="search">
-      <input type="text" placeholder="Tìm đơn hàng, nhân viên, sản phẩm, tài xế...">
+      <input id="adminSearchInput" type="text" placeholder="Tìm đơn hàng, nhân viên, sản phẩm, tài xế..." oninput="filterAdminData()">
       <button>🔍</button>
     </div>
     <a class="header-action auth-action" id="authAction" href="auth.html"><span class="icon">👤</span><div id="authActionText">Đăng<br>nhập</div></a>
@@ -39,14 +39,14 @@
     </div>
   </div>
   <section class="dashboard-grid">
-    <div class="stat-card"><h3>128</h3><p>Tổng đơn hàng</p></div>
-    <div class="stat-card"><h3>35</h3><p>Đơn đang giao</p></div>
-    <div class="stat-card"><h3>12</h3><p>Xe hoạt động</p></div>
-    <div class="stat-card"><h3>86.5M</h3><p>Doanh thu demo</p></div>
+    <div class="stat-card"><h3 id="adminTotalOrders">0</h3><p>Tổng đơn hàng</p></div>
+    <div class="stat-card"><h3 id="adminShippingOrders">0</h3><p>Đơn đang giao</p></div>
+    <div class="stat-card"><h3 id="adminTotalProducts">0</h3><p>Sản phẩm Admin</p></div>
+    <div class="stat-card"><h3 id="adminTotalUsers">0</h3><p>Tài khoản</p></div>
   </section>
 
   <section class="section">
-    <div class="section-head"><h2>Phân quyền bộ phận làm việc</h2><a href="#">Thêm tài khoản ></a></div>
+    <div class="section-head"><h2>Phân quyền bộ phận làm việc</h2><a href="#adminUserForm">Thêm tài khoản ></a></div>
     <div style="padding:16px;">
       <div class="role-grid">
         <div class="role-card"><div class="role-icon">👑</div><h4>Admin</h4><p>Quản lý hệ thống, phân quyền, doanh thu, tài khoản và báo cáo.</p></div>
@@ -60,6 +60,7 @@
     <div class="panel">
       <h3>Thêm/sửa sản phẩm</h3>
       <p>Khu vực dành cho nhân viên sản phẩm.</p>
+      <input id="adminProductId" type="hidden">
       <input id="adminProductName" placeholder="Tên sản phẩm"><br><br>
       <div class="form-row">
         <input id="adminProductPrice" type="number" min="0" placeholder="Giá bán">
@@ -67,7 +68,10 @@
       </div>
       <textarea id="adminProductDescription" rows="4" placeholder="Mô tả sản phẩm"></textarea>
       <br><br>
-      <button class="btn btn-primary" type="button" onclick="createAdminProduct()">Lưu sản phẩm</button>
+      <div class="admin-actions">
+        <button class="btn btn-primary" type="button" onclick="createAdminProduct()" id="adminProductSaveButton">Lưu sản phẩm</button>
+        <button class="btn btn-secondary" type="button" onclick="resetAdminProductForm()">Hủy sửa</button>
+      </div>
       <div class="result-box" id="adminProductResult"></div>
       <div class="admin-list" id="adminProductList"></div>
     </div>
@@ -97,6 +101,7 @@
           <th>Bộ phận xử lý</th>
           <th>Trạng thái</th>
           <th>Tài xế</th>
+          <th>Thao tác</th>
         </tr>
       </thead>
       <tbody id="adminOrderTableBody">
@@ -106,6 +111,7 @@
           <td>Điều phối</td>
           <td><span class="status ship">Đang giao</span></td>
           <td>Tài xế A</td>
+          <td><button class="btn btn-secondary" type="button" onclick="selectOrderForAssignment('LG20260620-001')">Chọn</button></td>
         </tr>
         <tr>
           <td>LG20260620-002</td>
@@ -113,6 +119,7 @@
           <td>Kho vận</td>
           <td><span class="status pending">Chờ xuất kho</span></td>
           <td>Chưa phân</td>
+          <td><button class="btn btn-secondary" type="button" onclick="selectOrderForAssignment('LG20260620-002')">Chọn</button></td>
         </tr>
         <tr>
           <td>LG20260620-003</td>
@@ -120,6 +127,7 @@
           <td>CSKH</td>
           <td><span class="status ok">Hoàn tất</span></td>
           <td>Tài xế B</td>
+          <td><button class="btn btn-secondary" type="button" onclick="selectOrderForAssignment('LG20260620-003')">Chọn</button></td>
         </tr>
       </tbody>
     </table>
@@ -130,6 +138,18 @@
       <h2>Danh sách tài khoản</h2>
       <a href="#" onclick="loadUserList(); return false;">Tải lại</a>
     </div>
+    <div class="admin-user-form" id="adminUserForm">
+      <input id="adminUserDisplayName" placeholder="Họ tên">
+      <input id="adminUsername" placeholder="Username">
+      <input id="adminUserPassword" type="password" placeholder="Mật khẩu">
+      <select id="adminUserRole">
+        <option value="customer">Khách hàng</option>
+        <option value="staff">Nhân viên</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button class="btn btn-primary" type="button" onclick="createAdminUser()">Tạo tài khoản</button>
+    </div>
+    <div class="result-box" id="adminUserResult"></div>
     <div class="user-list" id="userListContainer">
       <p>Đăng nhập bằng tài khoản Admin để xem danh sách tài khoản.</p>
     </div>

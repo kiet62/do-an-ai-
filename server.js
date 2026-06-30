@@ -47,8 +47,8 @@ const dbAll = (sql, params = []) => new Promise((resolve, reject) => {
 });
 
 const rolePermissions = {
-  admin: ['manage_users', 'view_reports', 'manage_products', 'assign_orders'],
-  staff: ['manage_products', 'view_orders'],
+  admin: ['manage_users', 'view_reports', 'manage_products', 'assign_orders', 'view_products', 'view_orders'],
+  staff: ['manage_products', 'view_orders', 'view_products'],
   customer: ['view_products', 'create_orders']
 };
 
@@ -219,6 +219,38 @@ app.post('/api/products', authenticateToken, authorizeRole(['admin', 'staff']), 
   res.status(201).json({ message: 'Sản phẩm đã được lưu.', product });
 });
 
+app.put('/api/products/:id', authenticateToken, authorizeRole(['admin', 'staff']), async (req, res) => {
+  const { name, price, category, description } = req.body;
+  const numericPrice = Number(price);
+  if (!name || !numericPrice || numericPrice < 0) {
+    return res.status(400).json({ message: 'Thiếu tên sản phẩm hoặc giá bán không hợp lệ.' });
+  }
+
+  const existing = await dbGet('SELECT id FROM products WHERE id = ?', [req.params.id]);
+  if (!existing) return res.status(404).json({ message: 'Không tìm thấy sản phẩm.' });
+
+  const product = {
+    id: req.params.id,
+    name: name.trim(),
+    price: Math.round(numericPrice),
+    category: category || 'Khác',
+    description: description || ''
+  };
+
+  await dbRun(
+    'UPDATE products SET name = ?, price = ?, category = ?, description = ? WHERE id = ?',
+    [product.name, product.price, product.category, product.description, product.id]
+  );
+
+  res.json({ message: 'Sản phẩm đã được cập nhật.', product });
+});
+
+app.delete('/api/products/:id', authenticateToken, authorizeRole(['admin', 'staff']), async (req, res) => {
+  const result = await dbRun('DELETE FROM products WHERE id = ?', [req.params.id]);
+  if (!result.changes) return res.status(404).json({ message: 'Không tìm thấy sản phẩm.' });
+  res.json({ message: 'Sản phẩm đã được xóa.' });
+});
+
 app.get('/api/orders', authenticateToken, (req, res) => {
   if (req.user.role === 'customer') {
     return res.json({ orders: [{ orderId: 'LG20260620-010', status: 'Đang xử lý', total: 129000 }] });
@@ -299,6 +331,57 @@ app.post('/api/assign', authenticateToken, authorizeRole(['admin']), async (req,
 app.get('/api/users', authenticateToken, authorizeRole(['admin']), async (req, res) => {
   const usersList = await dbAll('SELECT id, username, role, displayName FROM users');
   res.json({ users: usersList });
+});
+
+app.post('/api/users', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+  const { displayName, username, password, role = 'customer' } = req.body;
+  const allowedRoles = ['admin', 'staff', 'customer'];
+  if (!displayName || !username || !password || !allowedRoles.includes(role)) {
+    return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin tài khoản.' });
+  }
+
+  const existingUser = await dbGet('SELECT id FROM users WHERE username = ?', [username]);
+  if (existingUser) return res.status(409).json({ message: 'Username đã tồn tại.' });
+
+  const user = {
+    id: `${Date.now()}-${Math.random()}`,
+    username: username.trim(),
+    passwordHash: bcrypt.hashSync(password, 10),
+    role,
+    displayName: displayName.trim()
+  };
+
+  await dbRun(
+    'INSERT INTO users (id, username, passwordHash, role, displayName) VALUES (?, ?, ?, ?, ?)',
+    [user.id, user.username, user.passwordHash, user.role, user.displayName]
+  );
+
+  res.status(201).json({ message: 'Tài khoản đã được tạo.', user: { id: user.id, username: user.username, role: user.role, displayName: user.displayName } });
+});
+
+app.patch('/api/users/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+  const { role, displayName } = req.body;
+  const allowedRoles = ['admin', 'staff', 'customer'];
+  if (role && !allowedRoles.includes(role)) return res.status(400).json({ message: 'Vai trò không hợp lệ.' });
+
+  const existing = await dbGet('SELECT id, username, role, displayName FROM users WHERE id = ?', [req.params.id]);
+  if (!existing) return res.status(404).json({ message: 'Không tìm thấy tài khoản.' });
+
+  const nextRole = role || existing.role;
+  const nextDisplayName = displayName?.trim() || existing.displayName;
+  await dbRun('UPDATE users SET role = ?, displayName = ? WHERE id = ?', [nextRole, nextDisplayName, req.params.id]);
+
+  res.json({ message: 'Tài khoản đã được cập nhật.', user: { ...existing, role: nextRole, displayName: nextDisplayName } });
+});
+
+app.delete('/api/users/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+  if (req.params.id === req.user.id) {
+    return res.status(400).json({ message: 'Không thể xóa chính tài khoản đang đăng nhập.' });
+  }
+
+  const result = await dbRun('DELETE FROM users WHERE id = ?', [req.params.id]);
+  if (!result.changes) return res.status(404).json({ message: 'Không tìm thấy tài khoản.' });
+  res.json({ message: 'Tài khoản đã được xóa.' });
 });
 
 app.post('/api/chat', async (req, res) => {
