@@ -917,46 +917,6 @@ function copyText(text) {
   }
 }
 
-function calculateWarehouseFee() {
-  if (!requireLogin('tính phí lưu kho')) return;
-  const pallets = Number(document.getElementById('warehousePallets')?.value || 0);
-  const days = Number(document.getElementById('warehouseDays')?.value || 0);
-  const result = document.getElementById('warehouseResult');
-  if (!result) return;
-  result.style.display = 'block';
-
-  if (!pallets || !days) {
-    result.innerHTML = 'Vui lòng nhập số pallet và số ngày lưu kho.';
-    return;
-  }
-
-  const dailyRate = 35000;
-  const handlingFee = pallets * 20000;
-  const total = pallets * days * dailyRate + handlingFee;
-  result.innerHTML =
-    `<strong>Phí lưu kho tạm tính:</strong> ${formatVND(total)}<br>` +
-    `<strong>Chi tiết:</strong> ${pallets} pallet × ${days} ngày × ${formatVND(dailyRate)} + phí nhập/xuất ${formatVND(handlingFee)}.`;
-}
-
-function checkCustomsDocs() {
-  if (!requireLogin('kiểm tra hồ sơ hải quan')) return;
-  const required = ['Hóa đơn thương mại', 'Packing list', 'Vận đơn', 'Tờ khai hải quan'];
-  const selected = Array.from(document.querySelectorAll('.customs-doc:checked')).map(input => input.value);
-  const missing = required.filter(item => !selected.includes(item));
-  const result = document.getElementById('customsResult');
-  if (!result) return;
-  result.style.display = 'block';
-
-  if (!missing.length) {
-    result.innerHTML = '<strong>Hồ sơ cơ bản đã đủ.</strong><br>Có thể chuyển sang bước khai báo và đối chiếu mã HS.';
-    return;
-  }
-
-  result.innerHTML =
-    '<strong>Hồ sơ còn thiếu:</strong><br>' +
-    missing.map(item => `- ${escapeHtml(item)}`).join('<br>');
-}
-
 function runGreedy(){
   if (!requireLogin('tối ưu tuyến giao hàng')) return;
   const result = document.getElementById('greedyResult');

@@ -18,8 +18,6 @@
       <button type="button" onclick="goToLogisticsPanel('map')"><span>🗺️</span>Bản đồ giao hàng</button>
       <button type="button" onclick="goToLogisticsPanel('transportForm')"><span>🚚</span>Đặt vận chuyển</button>
       <button type="button" onclick="goToLogisticsPanel('greedyPanel')"><span>🧭</span>Tối ưu tuyến</button>
-      <button type="button" onclick="goToLogisticsPanel('warehousePanel')"><span>🏬</span>Tính phí lưu kho</button>
-      <button type="button" onclick="goToLogisticsPanel('customsPanel')"><span>🧾</span>Kiểm tra hải quan</button>
       <button type="button" onclick="goToLogisticsPanel('transportHistoryPanel')"><span>📋</span>Lịch sử yêu cầu</button>
     </div>
     <div class="search">
@@ -104,32 +102,6 @@ Bình Dương</textarea>
       <br><br>
       <button class="btn btn-primary" onclick="runGreedy()">Chạy Greedy demo</button>
       <div class="result-box" id="greedyResult"></div>
-    </div>
-  </section>
-
-  <section class="panel-grid">
-    <div class="panel" id="warehousePanel">
-      <h3>Tính phí lưu kho</h3>
-      <p>Ước tính chi phí lưu kho theo số pallet và số ngày lưu trữ.</p>
-      <div class="form-row">
-        <input id="warehousePallets" type="number" min="1" placeholder="Số pallet">
-        <input id="warehouseDays" type="number" min="1" placeholder="Số ngày lưu kho">
-      </div>
-      <button class="btn btn-primary" type="button" onclick="calculateWarehouseFee()">Tính phí lưu kho</button>
-      <div class="result-box" id="warehouseResult"></div>
-    </div>
-
-    <div class="panel" id="customsPanel">
-      <h3>Kiểm tra hồ sơ hải quan</h3>
-      <p>Đánh dấu các chứng từ đã có để kiểm tra nhanh hồ sơ cơ bản.</p>
-      <div class="logistics-checks">
-        <label><input class="customs-doc" type="checkbox" value="Hóa đơn thương mại"> Hóa đơn thương mại</label>
-        <label><input class="customs-doc" type="checkbox" value="Packing list"> Packing list</label>
-        <label><input class="customs-doc" type="checkbox" value="Vận đơn"> Vận đơn</label>
-        <label><input class="customs-doc" type="checkbox" value="Tờ khai hải quan"> Tờ khai hải quan</label>
-      </div>
-      <button class="btn btn-primary" type="button" onclick="checkCustomsDocs()">Kiểm tra hồ sơ</button>
-      <div class="result-box" id="customsResult"></div>
     </div>
   </section>
 
