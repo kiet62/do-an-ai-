@@ -80,6 +80,7 @@ function updateCartCount() {
   cartCount = currentUser && authToken ? cartItems.reduce((sum, item) => sum + item.quantity, 0) : 0;
   const cart = document.getElementById('cartCount');
   if (cart) cart.innerText = cartCount;
+  updateUserInfoPanel();
 }
 
 function formatVND(value) {
@@ -377,6 +378,7 @@ function clearAuth() {
   currentUser = null;
   localStorage.removeItem('logiport_token');
   localStorage.removeItem('logiport_user');
+  closeUserInfo();
   updateAuthUI();
   updateCartCount();
   renderCart();
@@ -398,7 +400,48 @@ function updateAuthUI() {
     logoutButtons.forEach(btn => btn.style.display = 'none');
     if (adminLink) adminLink.style.display = 'inline-flex';
   }
+  updateUserInfoPanel();
 }
+
+function toggleUserInfo(event) {
+  if (!currentUser || !authToken) return true;
+  event.preventDefault();
+  const popover = document.getElementById('userInfoPopover');
+  if (!popover) return false;
+  updateUserInfoPanel();
+  const isOpen = popover.classList.toggle('open');
+  popover.setAttribute('aria-hidden', String(!isOpen));
+  return false;
+}
+
+function closeUserInfo() {
+  const popover = document.getElementById('userInfoPopover');
+  if (!popover) return;
+  popover.classList.remove('open');
+  popover.setAttribute('aria-hidden', 'true');
+}
+
+function updateUserInfoPanel() {
+  const displayName = document.getElementById('profileDisplayName');
+  const username = document.getElementById('profileUsername');
+  const role = document.getElementById('profileRole');
+  const profileCartCount = document.getElementById('profileCartCount');
+  if (!displayName || !username || !role || !profileCartCount) return;
+
+  displayName.textContent = currentUser?.displayName || currentUser?.username || 'Khách hàng';
+  username.textContent = currentUser?.username ? `@${currentUser.username}` : 'Chưa đăng nhập';
+  role.textContent = currentUser?.role || 'Khách hàng';
+  profileCartCount.textContent = String(cartCount);
+}
+
+document.addEventListener('click', event => {
+  const popover = document.getElementById('userInfoPopover');
+  const authAction = document.getElementById('authAction');
+  if (!popover || !authAction || !popover.classList.contains('open')) return;
+  if (!popover.contains(event.target) && !authAction.contains(event.target)) {
+    closeUserInfo();
+  }
+});
 
 function protectAdminPage() {
   const guard = document.getElementById('adminGuard');
