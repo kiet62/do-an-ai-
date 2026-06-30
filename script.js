@@ -408,6 +408,7 @@ function toggleUserInfo(event) {
   event.preventDefault();
   const popover = document.getElementById('userInfoPopover');
   if (!popover) return false;
+  closeHeaderPanels();
   updateUserInfoPanel();
   const isOpen = popover.classList.toggle('open');
   popover.setAttribute('aria-hidden', String(!isOpen));
@@ -434,12 +435,41 @@ function updateUserInfoPanel() {
   profileCartCount.textContent = String(cartCount);
 }
 
+function toggleHeaderPanel(panelId) {
+  closeUserInfo();
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  const shouldOpen = !panel.classList.contains('open');
+  closeHeaderPanels();
+  if (panelId === 'cartPanel') {
+    renderCart();
+    renderOrderHistory();
+  }
+  if (shouldOpen) {
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+  }
+}
+
+function closeHeaderPanels() {
+  document.querySelectorAll('.header-popover.open').forEach(panel => {
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+  });
+}
+
 document.addEventListener('click', event => {
   const popover = document.getElementById('userInfoPopover');
   const authAction = document.getElementById('authAction');
-  if (!popover || !authAction || !popover.classList.contains('open')) return;
-  if (!popover.contains(event.target) && !authAction.contains(event.target)) {
+  const clickedHeaderPanel = event.target.closest?.('.header-popover');
+  const clickedHeaderButton = event.target.closest?.('.header-action-button');
+
+  if (popover && authAction && popover.classList.contains('open') && !popover.contains(event.target) && !authAction.contains(event.target)) {
     closeUserInfo();
+  }
+
+  if (!clickedHeaderPanel && !clickedHeaderButton) {
+    closeHeaderPanels();
   }
 });
 

@@ -19,8 +19,33 @@
       <button onclick="searchProduct()">🔍</button>
     </div>
     <div class="header-action"><span class="icon">☎</span><div>Hotline<br>1900.5301</div></div>
-    <div class="header-action"><span class="icon">📦</span><div>Tra cứu<br>đơn hàng</div></div>
-    <div class="header-action"><span class="icon">🛒</span><div>Giỏ hàng<br><span id="cartCount">0</span> sản phẩm</div></div>
+    <button class="header-action header-action-button" type="button" id="orderLookupAction" onclick="toggleHeaderPanel('orderLookupPanel')"><span class="icon">📦</span><div>Tra cứu<br>đơn hàng</div></button>
+    <button class="header-action header-action-button" type="button" id="cartAction" onclick="toggleHeaderPanel('cartPanel')"><span class="icon">🛒</span><div>Giỏ hàng<br><span id="cartCount">0</span> sản phẩm</div></button>
+    <div class="header-popover order-lookup-popover" id="orderLookupPanel" aria-hidden="true">
+      <div class="header-popover-head">
+        <strong>Tra cứu đơn hàng</strong>
+        <button type="button" onclick="closeHeaderPanels()" aria-label="Đóng">×</button>
+      </div>
+      <div class="order-search-grid">
+        <input id="orderCodeInput" type="text" placeholder="Nhập mã đơn hàng: LG20260620-001">
+        <button class="btn btn-primary" type="button" onclick="trackOrder('orderCodeInput','orderLookupResult')">Tra cứu</button>
+      </div>
+      <div class="result-box" id="orderLookupResult"></div>
+    </div>
+    <div class="header-popover cart-popover" id="cartPanel" aria-hidden="true">
+      <div class="header-popover-head">
+        <strong>Giỏ hàng của bạn</strong>
+        <button type="button" onclick="closeHeaderPanels()" aria-label="Đóng">×</button>
+      </div>
+      <div class="cart-popover-tools">
+        <button class="btn btn-secondary" type="button" onclick="clearCart()">Xóa toàn bộ</button>
+      </div>
+      <div class="product-grid" id="cartContent"><p>Giỏ hàng đang trống. Thêm sản phẩm vào giỏ để xem chi tiết ở đây.</p></div>
+      <div class="cart-summary" id="cartSummary"></div>
+      <div class="result-box" id="checkoutResult"></div>
+      <h3 class="order-history-title">Lịch sử đặt hàng</h3>
+      <div class="order-history" id="orderHistory"></div>
+    </div>
     <a class="header-action auth-action" id="authAction" href="auth.html" onclick="toggleUserInfo(event)"><span class="icon">👤</span><div id="authActionText">Đăng<br>nhập</div></a>
     <div class="user-info-popover" id="userInfoPopover" aria-hidden="true">
       <div class="user-info-head">
@@ -33,7 +58,7 @@
       <div class="user-info-row"><span>Vai trò</span><strong id="profileRole">Khách hàng</strong></div>
       <div class="user-info-row"><span>Số sản phẩm trong giỏ</span><strong id="profileCartCount">0</strong></div>
       <div class="user-info-actions">
-        <a class="btn btn-primary" href="#cartContent" onclick="closeUserInfo()">Xem giỏ hàng</a>
+        <a class="btn btn-primary" href="#electronics" onclick="closeUserInfo()">Mua hàng</a>
         <button class="btn btn-red" type="button" onclick="clearAuth()">Đăng xuất</button>
       </div>
     </div>
@@ -86,24 +111,6 @@
     <div class="promo-card"><h3>Fashion</h3><p>Giao nhanh 24h</p><div class="emoji">👕</div></div>
     <div class="promo-card"><h3>Model Ship</h3><p>Đóng gói chống sốc</p><div class="emoji">🚢</div></div>
     <div class="promo-card"><h3>Packing</h3><p>Vật tư kho vận</p><div class="emoji">📦</div></div>
-  </section>
-
-  <section class="section">
-    <div class="section-head"><h2>Tra cứu đơn hàng nhanh</h2><a href="logistics.html">Xem thêm logistics ></a></div>
-    <div class="order-search-grid">
-      <input id="orderCodeInput" type="text" placeholder="Nhập mã đơn hàng: LG20260620-001">
-      <button class="btn btn-primary" type="button" onclick="trackOrder('orderCodeInput','orderLookupResult')">Tra cứu đơn hàng</button>
-    </div>
-    <div class="result-box" id="orderLookupResult"></div>
-  </section>
-
-  <section class="section">
-    <div class="section-head"><h2>Giỏ hàng của bạn</h2><a href="#" onclick="clearCart(); return false;">Xóa toàn bộ</a></div>
-    <div class="product-grid" id="cartContent"><p>Giỏ hàng đang trống. Thêm sản phẩm vào giỏ để xem chi tiết ở đây.</p></div>
-    <div class="cart-summary" id="cartSummary"></div>
-    <div class="result-box" id="checkoutResult"></div>
-    <h3 class="order-history-title">Lịch sử đặt hàng</h3>
-    <div class="order-history" id="orderHistory"></div>
   </section>
 
   <section class="section" id="electronics">
